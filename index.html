@@ -286,16 +286,16 @@ table.mini td:first-child{font-weight:700;white-space:nowrap}
   </section>
 
   <!-- ═══════ SLIDE 2 ═══════ -->
-  <section class="slide" id="s2" aria-label="Слайд 2: ограничения — линия 1С и мощность">
+  <section class="slide" id="s2" aria-label="Слайд 2: ограничение">
    <div class="sh">
-    <h1>Ограничение — линия 1С и ожидание</h1>
+    <h1>Ограничение</h1>
     <h2 id="s2sub"></h2>
    </div>
    <div class="s2b">
     <div class="s2L">
      <div class="cc" style="flex:1">
       <h3>1С против Web: скорость и доля багов</h3>
-      <p class="hint">Чем длиннее полоса — тем лучше (скорость) или хуже (баги). 1С закрывает в 1,5× медленнее Web. У Web и Mobile — высокая доля багов.</p>
+      <p class="hint">Чем длиннее полоса — тем лучше (скорость) или хуже (баги). 1С закрывает в 1,5× медленнее Web. Mobile (теги mobile/app, 229 карточек на 4 дорожках) — 52% закрытых это баги.</p>
       <figure aria-label="Парные горизонтальные столбцы 1С vs Web">
        <svg id="pbSvg" viewBox="0 0 650 190" preserveAspectRatio="xMidYMid meet">
         <title>1С vs Web: скорость закрытия и доля багов</title>
@@ -904,7 +904,7 @@ function drawStackedBars(id,rows){
 ════════════════════════════════════ */
 function drawPairedBars(id,groups){
   const svg=document.getElementById(id);
-  const W=650,H=190,p={t:16,r:104,b:28,l:128};
+  const W=650,H=190,p={t:12,r:104,b:8,l:128};
   const cw=W-p.l-p.r,bH=19,bgap=5,ggap=16;
   let y=p.t;
 
@@ -939,26 +939,6 @@ function drawPairedBars(id,groups){
     });
     y+=ggap;
   });
-
-  // Mobile separate marker — bar slightly higher so two-line label fits inside viewBox
-  const mobileBarW=DATA.lines.bugShareClosed.mobile/100*cw;
-  const mobileY=H-42;
-  svg.appendChild(se('rect',{x:p.l,y:mobileY-7,
-    width:mobileBarW,height:14,fill:C.red,rx:'4',opacity:'.25'}));
-  // percentage value right of bar
-  const mt=se('text',{x:p.l+mobileBarW+6,y:mobileY,
-    'font-size':'14','font-weight':'700','fill':C.red,'dominant-baseline':'middle'});
-  mt.textContent=DATA.lines.bugShareClosed.mobile+'% багов';
-  svg.appendChild(mt);
-  // two-line description below the bar (left-aligned, fits within viewBox)
-  const ml1=se('text',{x:p.l,y:mobileY+10,
-    'font-size':'13','font-weight':'700','fill':C.red,'dominant-baseline':'hanging'});
-  ml1.textContent='Mobile (теги mobile/app): '+DATA.lines.bugShareClosed.mobile+'% багов среди закрытых';
-  svg.appendChild(ml1);
-  const ml2=se('text',{x:p.l,y:mobileY+23,
-    'font-size':'13','fill':C.red,'dominant-baseline':'hanging'});
-  ml2.textContent='229 карточек · 4 дорожки';
-  svg.appendChild(ml2);
 }
 
 /* ════════════════════════════════════
@@ -995,19 +975,23 @@ function drawGauge(id,value,maxVal,color,showOverflow){
   svg.appendChild(se('path',{
     d:`M ${bx1} ${cy} A ${R} ${R} 0 0 1 ${bx2} ${cy}`,
     fill:'none',stroke:'#DDE3EB','stroke-width':'12','stroke-linecap':'round'}));
-  // value arc
-  const pct=Math.min(value/maxVal,1);
-  if(pct>0.01){
+  // value arc: if value ≥ max, paint the full upper semicircle (two 90° arcs, no SVG large-arc ambiguity)
+  const over=value>=maxVal;
+  const pct=over?1:Math.min(value/maxVal,1);
+  if(pct>=0.999){
+    svg.appendChild(se('path',{
+      d:`M ${bx1} ${cy} A ${R} ${R} 0 0 1 ${cx} ${cy-R} A ${R} ${R} 0 0 1 ${bx2} ${cy}`,
+      fill:'none',stroke:color,'stroke-width':'12','stroke-linecap':'round'}));
+  }else if(pct>0.01){
     const ang=(180+pct*180)*Math.PI/180;
     const ex=(cx+R*Math.cos(ang)).toFixed(2);
     const ey=(cy+R*Math.sin(ang)).toFixed(2);
-    const la=pct>=0.999?1:0;
     svg.appendChild(se('path',{
-      d:`M ${bx1} ${cy} A ${R} ${R} 0 ${la} 1 ${ex} ${ey}`,
+      d:`M ${bx1} ${cy} A ${R} ${R} 0 0 1 ${ex} ${ey}`,
       fill:'none',stroke:color,'stroke-width':'12','stroke-linecap':'round'}));
   }
   // overflow marker
-  if(showOverflow&&value>maxVal*0.95){
+  if(showOverflow&&over){
     const ov=se('text',{x:cx,y:cy+22,'text-anchor':'middle','font-size':'13','font-weight':'700','fill':C.red,'dominant-baseline':'hanging'});
     ov.textContent='ПЕРЕГРУЗКА';
     svg.appendChild(ov);
@@ -1126,13 +1110,14 @@ function init(){
     ]},
     {label:'Баги среди\nзакрытых', max:100, pairs:[
       {label:'Web',value:DATA.lines.bugShareClosed.web, color:C.amber},
-      {label:'1С', value:DATA.lines.bugShareClosed.c1,  color:C.teal}
+      {label:'1С', value:DATA.lines.bugShareClosed.c1,  color:C.teal},
+      {label:'Mobile',value:DATA.lines.bugShareClosed.mobile, color:C.red}
     ]}
   ]);
 
   // Gauges
-  drawGauge('g1Svg',DATA.capacity.webLoadPct,110,C.red,true);
-  document.getElementById('gWv').textContent=DATA.capacity.webLoadPct+'% ёмкости';
+  drawGauge('g1Svg',DATA.capacity.webLoadPct,100,C.red,true);
+  document.getElementById('gWv').textContent='выше нормы';
   document.getElementById('gWs').textContent=
     DATA.capacity.webClosedHours+' из '+DATA.capacity.webNominalHours+' ч.';
   document.getElementById('gWdet').innerHTML=
