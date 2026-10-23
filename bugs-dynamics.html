@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Баги и очередь — Доска ценностей и Downstream 2.0</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#F5F7FA;font-family:'Inter','Segoe UI',Arial,sans-serif;color:#142B4D;padding:32px 40px}
+.page{max-width:1240px;margin:0 auto}
+h1{font-size:28px;font-weight:800;letter-spacing:-.4px}
+.sub{font-size:13px;color:#555B66;margin-top:6px;line-height:1.45}
+.sec{margin:32px 0 14px;padding-left:12px;border-left:3px solid #1F8A8A}
+.sec h2{font-size:18px;font-weight:700}
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.kc{background:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 2px 8px rgba(20,43,77,.08);border-top:4px solid #1F8A8A}
+.kc.red{border-top-color:#C0392B}.kc.amber{border-top-color:#E08E0B}
+.kv{font-size:26px;font-weight:800;line-height:1}.kv.red{color:#C0392B}.kv.amber{color:#E08E0B}
+.kl{font-size:12px;color:#555B66;margin-top:5px;line-height:1.4}
+.cc{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 2px 8px rgba(20,43,77,.08);margin-bottom:16px}
+.cc h3{font-size:14px;font-weight:700;margin-bottom:4px}
+.hint{font-size:12px;color:#555B66;margin-bottom:10px;line-height:1.45;font-style:italic}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;font-size:11px;color:#555B66;padding:7px 8px;border-bottom:2px solid #EEF1F5;background:#F8F9FB}
+td{padding:6px 8px;border-bottom:1px solid #F0F2F5;vertical-align:top}
+td.num,th.num{text-align:right}
+tr:nth-child(even) td{background:#FAFBFC}
+.callout{border-radius:10px;padding:13px 16px;margin:14px 0;border-left:4px solid #1F8A8A;background:#EDF8F8}
+.callout.warn{background:#FFF8EC;border-left-color:#E08E0B}
+.callout.danger{background:#FFF4F4;border-left-color:#C0392B}
+.callout b{display:block;margin-bottom:4px;font-size:13px}
+.callout p{font-size:13px;line-height:1.55;color:#3A4D60}
+.leg{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:8px;font-size:12px;color:#555B66}
+.leg i{font-style:normal;display:inline-flex;align-items:center;gap:6px}
+.leg i::before{content:'';width:10px;height:10px;border-radius:2px;background:var(--c)}
+.footer{margin-top:24px;padding-top:12px;border-top:1px solid #DDE3EB;font-size:11px;color:#9aa;line-height:1.5}
+svg{display:block;width:100%}
+.note{font-size:12px;color:#555B66;line-height:1.5;margin:8px 0 16px}
+.formula{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.fb{background:#F5F7FA;border-radius:10px;padding:12px 14px;border:1px solid #E8ECF2}
+.fb b{display:block;font-size:12px;margin-bottom:6px}
+.fb .eq{font-size:13px;font-weight:700;color:#142B4D;margin:4px 0 8px;line-height:1.35}
+.fb p{font-size:12px;line-height:1.5;color:#3A4D60}
+.fb ul{margin:4px 0 0 16px;font-size:12px;line-height:1.5;color:#3A4D60}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Баги и рост очереди</h1>
+  <p class="sub">Доска ценностей (778 карточек) и Downstream 2.0 (1 132 карточки) · спринты по 2 недели · 28.05–16.10.2026 · выгрузки Kaiten 16.10.2026</p>
+
+  <div class="sec"><h2>Сводка</h2></div>
+  <div class="kgrid">
+    <div class="kc red"><div class="kv red">322</div><div class="kl">багов на Downstream<br>28,4% всех карточек · 28 открытых</div></div>
+    <div class="kc amber"><div class="kv amber">82</div><div class="kl">багов на Доске ценностей<br>10,5% карточек · 43 открытых</div></div>
+    <div class="kc"><div class="kv">r = 0,81</div><div class="kl">Downstream: прирост очереди и прирост багов идут вместе</div></div>
+    <div class="kc"><div class="kv">r = 0,98</div><div class="kl">Доска ценностей: открытые баги растут почти линейно с очередью</div></div>
+  </div>
+  <div class="kgrid">
+    <div class="kc red"><div class="kv red">142 / 142 / 38</div><div class="kl">Downstream, все баги<br>Mobile / Web / 1С</div></div>
+    <div class="kc amber"><div class="kv amber">18 / 6 / 4</div><div class="kl">Downstream, открытые баги сейчас<br>Mobile / Web / 1С</div></div>
+    <div class="kc"><div class="kv">24%</div><div class="kl">доля багов в открытой очереди Downstream на 16.10 (было 15% в конце мая)</div></div>
+    <div class="kc"><div class="kv">12%</div><div class="kl">доля багов в открытой очереди Доски ценностей — стабильна весь период</div></div>
+  </div>
+
+  <div class="callout danger">
+    <b>Главный вывод</b>
+    <p>На Downstream баги — это не «шум вокруг очереди», а её состав. Когда очередь растёт (создано больше, чем закрыто), растёт и запас открытых багов (r = 0,81). Новые баги не появляются «от размера очереди как такового» (r ≈ 0 с уровнем очереди), а едут в том же притоке работ. Mobile держит больше всего открытых багов (18 из 28). На Доске ценностей баги растут вместе со всем бэклогом (r = 0,98), но их доля почти не меняется (~12%) — PMO копит и ценности, и дефекты пропорционально.</p>
+  </div>
+
+  <p class="note"><b>Как считали.</b> Баг = тип «Bug» или тег Bug. Платформа: <b>1С</b> — лейн 1С или теги 1С/1C; <b>Mobile</b> — лейн Flutter или теги mobile / app / flutter / Дашборд МП; <b>Web</b> — лейн Web/Backend или теги Frontend/Backend. На Доске ценностей лейны пустые, поэтому часть карточек — «Прочее» (нет тега платформы). Закрытие: дата «Готово / Готово», иначе Updated у архивных. Очередь на конец спринта = создано до конца спринта и ещё не закрыто.</p>
+
+  <div class="sec"><h2>Downstream — очередь и открытые баги</h2></div>
+  <div class="callout">
+    <b>Как читать графики Downstream</b>
+    <p>
+      Дата под осью — <b>начало спринта</b> (2 недели). Точка и столбик — снимок <b>на конец этих двух недель</b>.<br>
+      <b>Линии:</b> две разные шкалы. Слева — все незакрытые карточки (до 280). Справа — только незакрытые баги (до 50). Пример: 28.05 красная ≈ 260 карточек, бирюзовая ≈ 40 багов — багов в 6 раз меньше.<br>
+      <b>Парные столбики:</b> слева приток (завели), справа склад (ещё висит). Стрелка — сколько закрыли. Часы над складом — оценка на следующий спринт.
+    </p>
+  </div>
+  <div class="cc">
+    <h3>Что висит в работе на конец спринта</h3>
+    <p class="hint">Красная линия — все незакрытые карточки, читать по <b>левой</b> шкале. Бирюзовая — незакрытые баги из этой очереди, читать по <b>правой</b> шкале. Когда обе линии идут вниз (11.06, 23.07, 17.09) — очередь расчищали, и багов тоже стало меньше. Когда обе вверх (25.06, 03.09) — завели больше, чем закрыли.</p>
+    <svg id="dsQueue" viewBox="0 0 760 300"></svg>
+    <div class="leg">
+      <i style="--c:#C0392B">Все незакрытые карточки (левая шкала)</i>
+      <i style="--c:#1F8A8A">Незакрытые баги (правая шкала)</i>
+    </div>
+    <p class="hint" style="margin-top:10px;font-style:normal">Коротко: очередь Downstream с мая по октябрь сжалась (260 → 106). Баги сжались слабее (40 → 25), поэтому их доля в очереди выросла с 15% до 24%.</p>
+  </div>
+  <div class="cc">
+    <h3>Приток и склад на одной оси спринтов</h3>
+    <p class="hint">В каждом спринте два столбика: слева <b>приток</b>, справа <b>склад</b>. Над стрелкой — часы переходящего склада на следующий спринт. Под стрелкой — сколько <b>закрыли</b>. Бирюзовая стрелка: закрыли ≥ завели и часы в буфере; красная: закрыли меньше или часы выше 224 ч.</p>
+    <svg id="dsCombo" viewBox="0 0 760 405"></svg>
+    <div class="leg">
+      <i style="--c:#1A7A6A">1С</i>
+      <i style="--c:#5B7FA6">Web</i>
+      <i style="--c:#C0392B">Mobile</i>
+    </div>
+    <p class="hint" style="margin-top:8px;font-style:normal">Серая подложка объединяет пару одного спринта. Не сравнивайте правый столбик спринта с левым столбиком следующего: это разные величины.</p>
+    <div class="formula">
+      <div class="fb">
+        <b>Формула склада</b>
+        <div class="eq">склад на конец = склад на начало + приток − закрыли</div>
+        <p>Пример спринта с 23.07 (на графике подписано у этой пары):</p>
+        <p><b>33 + 47 − 53 = 27</b></p>
+        <ul>
+          <li>33 — склад на конец прошлого спринта (с 09.07, плотный столбик)</li>
+          <li>47 — приток с 23.07 (бледный столбик, из них Web 40)</li>
+          <li>53 — закрыли за спринт (число на стрелке)</li>
+          <li>27 — склад на конец с 23.07 (плотный столбик). Это не 47.</li>
+        </ul>
+      </div>
+      <div class="fb">
+        <b>Что входит в расчётное время над складом</b>
+        <div class="eq">часы = (1С×3 + Web×2 + Mobile×2) SP × 4 ч</div>
+        <p>Оценка, сколько часов заберёт <b>весь текущий склад</b>, если закрывать его в следующем спринте.</p>
+        <ul>
+          <li><b>Входит:</b> открытые баги на конец спринта по платформам</li>
+          <li>1С-баг ≈ 3 SP (медиана оценок в Kaiten)</li>
+          <li>Web/Mobile-баг ≈ 2 SP (S; у большинства нет SP)</li>
+          <li>1 SP = 4 ч, 1 человек = 80 ч на спринт</li>
+          <li><b>Не входит:</b> новые баги следующего спринта, продуктовые задачи, PMO, факт списанных часов</li>
+        </ul>
+        <p style="margin-top:8px">Пример 16.10: 4×3 + 5×2 + 16×2 = <b>54 SP × 4 ч = 216 ч</b> ≈ 2,7 чел. Из них Mobile 16×2×4 = 128 ч при ёмкости Flutter 80 ч.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cc">
+    <h3>Склад → время и доля ёмкости следующего спринта</h3>
+    <p class="hint">Если закрывать весь склад в следующем спринте. 1С от 120 SP / 480 ч, Web от 140 SP / 560 ч, Flutter от 20 SP / 80 ч, все Dev от 280 SP / 1 120 ч. 1 чел. = 80 ч на спринт.</p>
+    <table>
+      <tr>
+        <th>Спринт</th>
+        <th class="num">Склад, шт</th>
+        <th class="num">SP</th>
+        <th class="num">Часы</th>
+        <th class="num">Чел.</th>
+        <th class="num">% 1С</th>
+        <th class="num">% Web</th>
+        <th class="num">% Mobile</th>
+        <th class="num">% всех Dev</th>
+      </tr>
+      <tbody id="dsCapTable"></tbody>
+    </table>
+  </div>
+  <div class="cc">
+    <h3>Какая доля работ — баги, %</h3>
+    <p class="hint"><b>Жёлтая «созданные»</b> — из новых карточек за спринт какая часть баги: баги завели ÷ все карточки завели. Это про приток, скачет от спринта к спринту.<br>
+    <b>Красная «открытые»</b> — из того, что ещё висит на конец спринта, какая часть баги: открытые баги ÷ вся открытая очередь. Это про склад, меняется медленнее.</p>
+    <svg id="dsShare" viewBox="0 0 760 220"></svg>
+    <div class="leg">
+      <i style="--c:#E08E0B">% багов среди новых карточек (приток)</i>
+      <i style="--c:#C0392B">% багов среди того, что ещё висит (склад)</i>
+    </div>
+    <p class="hint" style="margin-top:10px;font-style:normal">Пример спринта с 23.07: завели 88 карточек, из них 47 багов → жёлтая 53%. На конец спринта висит 170 карточек, из них 27 багов → красная 16%. Высокая жёлтая не страшна, если баги закрыли. Красная выросла с 15% в мае до 24% в октябре — в оставшейся очереди багов стало больше.</p>
+  </div>
+
+  <div class="cc">
+    <h3>Downstream по спринтам</h3>
+    <table>
+      <tr>
+        <th>Спринт</th>
+        <th class="num">Созд.</th><th class="num">Закр.</th><th class="num">Очередь</th>
+        <th class="num">Баги созд.</th><th class="num">Баги закр.</th><th class="num">Баги откр.</th>
+        <th class="num">Δ очереди</th><th class="num">Δ багов</th>
+        <th class="num">% багов в очереди</th>
+      </tr>
+      <tbody id="dsTable"></tbody>
+    </table>
+  </div>
+  <div class="cc">
+    <h3>Downstream: баги по платформам (создано / закрыто / открыто на конец)</h3>
+    <table>
+      <tr>
+        <th>Спринт</th>
+        <th class="num" colspan="3">1С</th>
+        <th class="num" colspan="3">Web</th>
+        <th class="num" colspan="3">Mobile</th>
+      </tr>
+      <tr>
+        <th></th>
+        <th class="num">созд</th><th class="num">закр</th><th class="num">откр</th>
+        <th class="num">созд</th><th class="num">закр</th><th class="num">откр</th>
+        <th class="num">созд</th><th class="num">закр</th><th class="num">откр</th>
+      </tr>
+      <tbody id="dsPlatTable"></tbody>
+    </table>
+  </div>
+
+  <div class="sec"><h2>Доска ценностей — очередь и баги</h2></div>
+  <div class="cc">
+    <h3>Открытая очередь vs открытые баги</h3>
+    <p class="hint">Очередь выросла 318 → 339 (с провалом в июне). Открытые баги 39 → 42. Доля держится около 12–13%. Корреляция уровней r = 0,997 — баги растут вместе с бэклогом, не отдельным всплеском.</p>
+    <svg id="vbQueue" viewBox="0 0 760 280"></svg>
+    <div class="leg">
+      <i style="--c:#C0392B">Открытая очередь (все карточки)</i>
+      <i style="--c:#1F8A8A">Открытые баги</i>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="cc">
+      <h3>Созданные баги по платформам</h3>
+      <p class="hint">На доске ценностей багов мало и они слабо размечены тегами. Большая часть — «Прочее» (нет лейна).</p>
+      <svg id="vbCreated" viewBox="0 0 520 240"></svg>
+    </div>
+    <div class="cc">
+      <h3>Открытые баги на конец спринта</h3>
+      <p class="hint">Из размеченных: 1С держит основной запас (13 на 16.10). Web почти без багов на этой доске.</p>
+      <svg id="vbOpenPlat" viewBox="0 0 520 240"></svg>
+    </div>
+  </div>
+  <div class="cc">
+    <h3>Доска ценностей по спринтам</h3>
+    <table>
+      <tr>
+        <th>Спринт</th>
+        <th class="num">Созд.</th><th class="num">Закр.</th><th class="num">Очередь</th>
+        <th class="num">Баги созд.</th><th class="num">Баги закр.</th><th class="num">Баги откр.</th>
+        <th class="num">Δ очереди</th><th class="num">Δ багов</th>
+        <th class="num">% багов в очереди</th>
+      </tr>
+      <tbody id="vbTable"></tbody>
+    </table>
+  </div>
+
+  <div class="sec"><h2>Корреляция: растёт очередь — растут ли баги</h2></div>
+  <div class="cc">
+    <table>
+      <tr>
+        <th>Связь (10 спринтов)</th>
+        <th class="num">Downstream</th>
+        <th class="num">Доска ценностей</th>
+        <th>Как читать</th>
+      </tr>
+      <tr>
+        <td>Уровень очереди × открытые баги</td>
+        <td class="num"><b>0,76</b></td>
+        <td class="num"><b>0,997</b></td>
+        <td>Когда очередь большая, запас багов тоже большой</td>
+      </tr>
+      <tr>
+        <td>Прирост очереди × прирост багов</td>
+        <td class="num"><b>0,81</b></td>
+        <td class="num"><b>0,98</b></td>
+        <td>Спринт, где очередь выросла, почти всегда добавляет и баги</td>
+      </tr>
+      <tr>
+        <td>Уровень очереди × новые баги за спринт</td>
+        <td class="num">−0,06</td>
+        <td class="num">0,34</td>
+        <td>Сама величина очереди не порождает всплеск новых багов в том же спринте</td>
+      </tr>
+      <tr>
+        <td>Прирост очереди × новые баги</td>
+        <td class="num">0,14</td>
+        <td class="num">0,01</td>
+        <td>Новые баги едут в общем притоке, а не «от перегруза как факта»</td>
+      </tr>
+    </table>
+    <p class="hint" style="margin-top:12px">Pearson по 10 точкам. |r| &gt; 0,7 — сильная связь, 0,3–0,7 средняя, около 0 — нет линейной связи.</p>
+  </div>
+
+  <div class="callout warn">
+    <b>Что это значит для 1С, Web и Mobile</b>
+    <p>
+      <b>Mobile</b> — главный носитель бага на Downstream: 142 из 322 всех багов и 18 из 28 открытых. В спринтах 03.09 и 01.10 приток багов 25 и 21 при слабом закрытии. Доля багов в открытой очереди Downstream выросла до 24% именно за счёт Mobile.<br>
+      <b>Web</b> — много багов в потоке (142 закрытых+открытых), но открытых сейчас 6: команда их закрывает, иногда пачками (23.07: 40 создано / 49 закрыто). Перегруз ёмкости Web связан с объёмом переделок, а не с зависшим запасом.<br>
+      <b>1С</b> — мало багов в Downstream (38 всего, 4 открытых, ~10–13% среди закрытых). На Доске ценностей наоборот: из размеченных багов 1С — основной остаток (13 открытых). Узкое место 1С — очередь продукта, не дефекты.
+    </p>
+  </div>
+
+  <div class="sec"><h2>Итоговый вывод и рекомендации</h2></div>
+  <div class="callout danger">
+    <b>Вывод в одном абзаце</b>
+    <p>Большая очередь сама по себе не «рождает» новые баги в том же спринте. Баги едут в общем притоке работ. Когда за спринт создают больше, чем закрывают, растёт и склад открытых багов. Downstream очередь с мая сжалась (260 → 106), а баги сжались слабее (40 → 25) — их доля выросла с 15% до 24%. Это не кризис качества 1С. Это Mobile (склад 16 из 25) и Web (закрывают, но ~40% ёмкости уходит на переделки). На Доске ценностей баги растут вместе со всем бэклогом при стабильных ~12%: PMO копит и ценности, и дефекты, не разбирая вход.</p>
+  </div>
+  <div class="g2">
+    <div class="cc">
+      <h3>Что делать PMO</h3>
+      <p class="hint" style="font-style:normal;margin:0;line-height:1.55">
+        1. Не пускать новую карточку на Доску ценностей, пока не закрыли или не сняли старую. Иначе баги на входе будут расти теми же ~12% от раздутого бэклога.<br>
+        2. 43 открытых бага на Доске ценностей — больше, чем 28 на Downstream. Разобрать: в разработку / отложить датой / закрыть. Не держать дефекты в приоритезации месяцами.<br>
+        3. В 1С не отдавать больше ёмкости: продукт ≤ 96 SP/спринт, буфер 24 SP. Очередь 1С — про объём продукта, не про баги.<br>
+        4. Баг, ценность и «срочно» — разные правила. Срочный баг не выкидывает продуктовую задачу без явного решения.
+      </p>
+    </div>
+    <div class="cc">
+      <h3>Что делать разработке</h3>
+      <p class="hint" style="font-style:normal;margin:0;line-height:1.55">
+        1. <b>Mobile</b> — отдельный фокус на 1–2 спринта: закрыть склад (~16) и разобрать, почему после обнуления (20.08, 17.09) снова приходит пачка (03.09: 25 завели / 2 закрыли). Цель: открытых Mobile ≤ 5, доля среди закрытых к 25%.<br>
+        2. <b>Web</b> — буфер 20% (32 SP) сразу. Всё сверх этого — расчистка, не новые фичи, пока доля багов среди закрытых не около 20–25% (сейчас ~35–41%).<br>
+        3. <b>1С</b> — баг-квоты хватает. Не раздувать bug-спринт. Держать очередь продукта ≤ 1 спринта, проставить SP на карточки без оценки.<br>
+        4. Правило спринта: 80% ценность / 20% баги и срочное. Высокий приток багов допустим, если их закрывают в том же спринте (как Web 23.07). Недопустимо копить склад, как Mobile 03.09.
+      </p>
+    </div>
+  </div>
+  <div class="cc">
+    <h3>На что смотреть следующие 3 спринта</h3>
+    <table>
+      <tr>
+        <th>Индикатор</th>
+        <th>Сейчас (16.10)</th>
+        <th>Цель</th>
+      </tr>
+      <tr><td>Доля багов в открытой очереди Downstream</td><td class="num">24%</td><td class="num">≤ 18%</td></tr>
+      <tr><td>Открытые баги Mobile</td><td class="num">16–18</td><td class="num">≤ 5</td></tr>
+      <tr><td>Доля багов среди закрытых Web / Mobile</td><td class="num">~35–41% / ~50%</td><td class="num">20–25%</td></tr>
+      <tr><td>Открытые баги на Доске ценностей</td><td class="num">43</td><td class="num">разобрать, не копить</td></tr>
+      <tr><td>Очередь 1С</td><td class="num">~2 спринта</td><td class="num">≤ 1 спринта</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">
+    Источники: Downstream-2.0-2026-10-16T08_46_38.885Z.xlsx (1 132) · 💰-Доска-ценностей-2026-10-16T04_13_15.970Z.xlsx (778).
+    Спринт = 2 недели. Последний период 01.10–16.10.2026. Баг = тип Bug или тег Bug. Платформа по лейну и тегам; на Доске ценностей лейны не заполнены — много «Прочее».
+  </div>
+</div>
+
+<script>
+const C={dark:'#142B4D',teal:'#1F8A8A',red:'#C0392B',amber:'#E08E0B',gray:'#555B66',web:'#5B7FA6',c1:'#1A7A6A',mob:'#C0392B'};
+const NS='http://www.w3.org/2000/svg';
+function se(tag,a={}){const el=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(a))el.setAttribute(k,v);return el;}
+function st(x,y,txt,a={}){const el=se('text',{x,y,'dominant-baseline':'middle',...a});el.textContent=txt;return el;}
+
+const LABELS=['28.05','11.06','25.06','09.07','23.07','06.08','20.08','03.09','17.09','01.10'];
+const DS = {"total":1132,"bugs":322,"bugsOpen":28,"bySprint":[{"name":"28.05","created":73,"closed":22,"openEnd":260,"openBugs":40,"createdBugs":29,"closedBugs":5,"by":{"1С":{"createdBugs":2,"closedBugs":0,"openBugs":4},"Web":{"createdBugs":14,"closedBugs":5,"openBugs":23},"Mobile":{"createdBugs":13,"closedBugs":0,"openBugs":13}},"bugShareOpen":15,"bugShareCreated":40,"net":51,"netBugs":24},{"name":"11.06","created":36,"closed":139,"openEnd":157,"openBugs":25,"createdBugs":15,"closedBugs":30,"by":{"1С":{"createdBugs":4,"closedBugs":7,"openBugs":1},"Web":{"createdBugs":2,"closedBugs":19,"openBugs":6},"Mobile":{"createdBugs":9,"closedBugs":4,"openBugs":18}},"bugShareOpen":16,"bugShareCreated":42,"net":-103,"netBugs":-15},{"name":"25.06","created":106,"closed":51,"openEnd":212,"openBugs":34,"createdBugs":29,"closedBugs":20,"by":{"1С":{"createdBugs":7,"closedBugs":0,"openBugs":8},"Web":{"createdBugs":9,"closedBugs":2,"openBugs":13},"Mobile":{"createdBugs":13,"closedBugs":18,"openBugs":13}},"bugShareOpen":16,"bugShareCreated":27,"net":55,"netBugs":9},{"name":"09.07","created":59,"closed":34,"openEnd":237,"openBugs":33,"createdBugs":15,"closedBugs":16,"by":{"1С":{"createdBugs":1,"closedBugs":4,"openBugs":5},"Web":{"createdBugs":14,"closedBugs":1,"openBugs":26},"Mobile":{"createdBugs":0,"closedBugs":11,"openBugs":2}},"bugShareOpen":14,"bugShareCreated":25,"net":25,"netBugs":-1},{"name":"23.07","created":88,"closed":155,"openEnd":170,"openBugs":27,"createdBugs":47,"closedBugs":53,"by":{"1С":{"createdBugs":2,"closedBugs":1,"openBugs":6},"Web":{"createdBugs":40,"closedBugs":49,"openBugs":17},"Mobile":{"createdBugs":5,"closedBugs":3,"openBugs":4}},"bugShareOpen":16,"bugShareCreated":53,"net":-67,"netBugs":-6},{"name":"06.08","created":51,"closed":64,"openEnd":157,"openBugs":32,"createdBugs":21,"closedBugs":16,"by":{"1С":{"createdBugs":0,"closedBugs":4,"openBugs":2},"Web":{"createdBugs":1,"closedBugs":10,"openBugs":8},"Mobile":{"createdBugs":20,"closedBugs":2,"openBugs":22}},"bugShareOpen":20,"bugShareCreated":41,"net":-13,"netBugs":5},{"name":"20.08","created":71,"closed":99,"openEnd":129,"openBugs":18,"createdBugs":25,"closedBugs":39,"by":{"1С":{"createdBugs":3,"closedBugs":1,"openBugs":4},"Web":{"createdBugs":17,"closedBugs":12,"openBugs":13},"Mobile":{"createdBugs":5,"closedBugs":26,"openBugs":1}},"bugShareOpen":14,"bugShareCreated":35,"net":-28,"netBugs":-14},{"name":"03.09","created":86,"closed":55,"openEnd":160,"openBugs":39,"createdBugs":35,"closedBugs":14,"by":{"1С":{"createdBugs":2,"closedBugs":4,"openBugs":2},"Web":{"createdBugs":8,"closedBugs":8,"openBugs":13},"Mobile":{"createdBugs":25,"closedBugs":2,"openBugs":24}},"bugShareOpen":24,"bugShareCreated":41,"net":31,"netBugs":21},{"name":"17.09","created":75,"closed":130,"openEnd":105,"openBugs":17,"createdBugs":18,"closedBugs":40,"by":{"1С":{"createdBugs":4,"closedBugs":1,"openBugs":5},"Web":{"createdBugs":6,"closedBugs":10,"openBugs":9},"Mobile":{"createdBugs":8,"closedBugs":29,"openBugs":3}},"bugShareOpen":16,"bugShareCreated":24,"net":-55,"netBugs":-22},{"name":"01.10","created":125,"closed":124,"openEnd":106,"openBugs":25,"createdBugs":36,"closedBugs":28,"by":{"1С":{"createdBugs":4,"closedBugs":5,"openBugs":4},"Web":{"createdBugs":11,"closedBugs":15,"openBugs":5},"Mobile":{"createdBugs":21,"closedBugs":8,"openBugs":16}},"bugShareOpen":24,"bugShareCreated":29,"net":1,"netBugs":8}]};
+const VB = {"bySprint":[{"name":"28.05","created":35,"closed":1,"openEnd":318,"openBugs":39,"createdBugs":6,"closedBugs":0,"by":{"1С":{"createdBugs":2,"openBugs":18},"Web":{"createdBugs":0,"openBugs":1},"Mobile":{"createdBugs":0,"openBugs":6},"Прочее":{"createdBugs":4,"openBugs":14}},"bugShareOpen":12,"net":34,"netBugs":6},{"name":"11.06","created":32,"closed":124,"openEnd":226,"openBugs":29,"createdBugs":7,"closedBugs":17,"by":{"1С":{"createdBugs":3,"openBugs":15},"Web":{"createdBugs":0,"openBugs":1},"Mobile":{"createdBugs":2,"openBugs":5},"Прочее":{"createdBugs":2,"openBugs":8}},"bugShareOpen":13,"net":-92,"netBugs":-10},{"name":"25.06","created":52,"closed":29,"openEnd":249,"openBugs":31,"createdBugs":5,"closedBugs":3,"by":{"1С":{"createdBugs":3,"openBugs":18},"Web":{"createdBugs":0,"openBugs":1},"Mobile":{"createdBugs":0,"openBugs":3},"Прочее":{"createdBugs":2,"openBugs":9}},"bugShareOpen":12,"net":23,"netBugs":2},{"name":"09.07","created":35,"closed":29,"openEnd":255,"openBugs":32,"createdBugs":4,"closedBugs":3,"by":{"1С":{"createdBugs":0,"openBugs":18},"Web":{"createdBugs":0,"openBugs":1},"Mobile":{"createdBugs":1,"openBugs":4},"Прочее":{"createdBugs":3,"openBugs":9}},"bugShareOpen":13,"net":6,"netBugs":1},{"name":"23.07","created":37,"closed":31,"openEnd":261,"openBugs":33,"createdBugs":3,"closedBugs":2,"by":{"1С":{"createdBugs":0,"openBugs":17},"Web":{"createdBugs":0,"openBugs":1},"Mobile":{"createdBugs":2,"openBugs":6},"Прочее":{"createdBugs":1,"openBugs":9}},"bugShareOpen":13,"net":6,"netBugs":1},{"name":"06.08","created":31,"closed":37,"openEnd":255,"openBugs":32,"createdBugs":2,"closedBugs":3,"by":{"1С":{"createdBugs":0,"openBugs":15},"Web":{"createdBugs":0,"openBugs":1},"Mobile":{"createdBugs":0,"openBugs":5},"Прочее":{"createdBugs":2,"openBugs":11}},"bugShareOpen":13,"net":-6,"netBugs":-1},{"name":"20.08","created":37,"closed":42,"openEnd":250,"openBugs":31,"createdBugs":3,"closedBugs":4,"by":{"1С":{"createdBugs":0,"openBugs":15},"Web":{"createdBugs":0,"openBugs":1},"Mobile":{"createdBugs":0,"openBugs":4},"Прочее":{"createdBugs":3,"openBugs":11}},"bugShareOpen":12,"net":-5,"netBugs":-1},{"name":"03.09","created":73,"closed":40,"openEnd":283,"openBugs":36,"createdBugs":7,"closedBugs":2,"by":{"1С":{"createdBugs":0,"openBugs":14},"Web":{"createdBugs":0,"openBugs":1},"Mobile":{"createdBugs":0,"openBugs":3},"Прочее":{"createdBugs":7,"openBugs":18}},"bugShareOpen":13,"net":33,"netBugs":5},{"name":"17.09","created":66,"closed":28,"openEnd":321,"openBugs":40,"createdBugs":7,"closedBugs":3,"by":{"1С":{"createdBugs":0,"openBugs":13},"Web":{"createdBugs":0,"openBugs":1},"Mobile":{"createdBugs":1,"openBugs":3},"Прочее":{"createdBugs":6,"openBugs":23}},"bugShareOpen":12,"net":38,"netBugs":4},{"name":"01.10","created":80,"closed":62,"openEnd":339,"openBugs":42,"createdBugs":5,"closedBugs":3,"by":{"1С":{"createdBugs":0,"openBugs":13},"Web":{"createdBugs":0,"openBugs":1},"Mobile":{"createdBugs":1,"openBugs":3},"Прочее":{"createdBugs":4,"openBugs":25}},"bugShareOpen":12,"net":18,"netBugs":2}]};
+
+function dualLine(id, labels, a, b, aMax, bMax){
+  const svg=document.getElementById(id);
+  const W=760,H=300,p={t:28,r:56,b:48,l:56};
+  const cw=W-p.l-p.r,ch=H-p.t-p.b;
+  const x=i=>p.l+i/(labels.length-1)*cw;
+  const ya=v=>p.t+ch-v/aMax*ch, yb=v=>p.t+ch-v/bMax*ch;
+  svg.appendChild(st(p.l,12,'карточек в работе',{'font-size':'10','fill':C.red,'text-anchor':'start','font-weight':'700'}));
+  svg.appendChild(st(W-p.r,12,'багов в работе',{'font-size':'10','fill':C.teal,'text-anchor':'end','font-weight':'700'}));
+  for(let i=0;i<=4;i++){
+    const v=Math.round(aMax*i/4), y=ya(v);
+    svg.appendChild(se('line',{x1:p.l,y1:y,x2:W-p.r,y2:y,stroke:'#E8ECF2'}));
+    svg.appendChild(st(p.l-6,y,v,{'font-size':'10','fill':C.red,'text-anchor':'end'}));
+    svg.appendChild(st(W-p.r+6,yb(Math.round(bMax*i/4)), Math.round(bMax*i/4), {'font-size':'10','fill':C.teal,'text-anchor':'start'}));
+  }
+  labels.forEach((l,i)=>svg.appendChild(st(x(i),H-p.b+16,'с '+l,{'font-size':'10','fill':C.gray,'text-anchor':'middle'})));
+  const pa=a.map((v,i)=>x(i)+','+ya(v)).join(' ');
+  const pb=b.map((v,i)=>x(i)+','+yb(v)).join(' ');
+  svg.appendChild(se('polyline',{points:pa,fill:'none',stroke:C.red,'stroke-width':'2.4','stroke-linejoin':'round'}));
+  svg.appendChild(se('polyline',{points:pb,fill:'none',stroke:C.teal,'stroke-width':'2.4','stroke-linejoin':'round'}));
+  a.forEach((v,i)=>{
+    svg.appendChild(se('circle',{cx:x(i),cy:ya(v),r:3.5,fill:C.red}));
+    const above=ya(v)<yb(v);
+    svg.appendChild(st(x(i),ya(v)+(above?-11:12),v,{'font-size':'9','fill':C.red,'text-anchor':'middle','font-weight':'700'}));
+  });
+  b.forEach((v,i)=>{
+    svg.appendChild(se('circle',{cx:x(i),cy:yb(v),r:3.5,fill:C.teal}));
+    const above=yb(v)<=ya(v);
+    svg.appendChild(st(x(i),yb(v)+(above?-11:12),v,{'font-size':'9','fill':C.teal,'text-anchor':'middle','font-weight':'700'}));
+  });
+}
+
+const BUG_SP={'1С':3,Web:2,Mobile:2};
+const CAP_SP={'1С':120,Web:140,Mobile:20,all:280};
+const H_PER_SP=4, H_PER_PERSON=80, BUF_H=CAP_SP.all*H_PER_SP*0.2;
+function loadSP(by){return by['1С'].openBugs*BUG_SP['1С']+by.Web.openBugs*BUG_SP.Web+by.Mobile.openBugs*BUG_SP.Mobile;}
+function hoursOf(by){return loadSP(by)*H_PER_SP;}
+function peopleOf(by){return hoursOf(by)/H_PER_PERSON;}
+function pct(n,d){return Math.round(n/d*100);}
+function fmtPpl(n){return n.toFixed(1).replace('.',',');}
+
+function groupedCombo(id, sprints){
+  const svg=document.getElementById(id);
+  const W=760,H=405,p={t:78,r:10,b:54,l:36};
+  const n=sprints.length;
+  const inflow=sprints.map(s=>s.createdBugs);
+  const stock=sprints.map(s=>s.openBugs);
+  const closed=sprints.map(s=>s.closedBugs);
+  const maxV=Math.max(...inflow,...stock)*1.2||1;
+  const cw=W-p.l-p.r, ch=H-p.t-p.b, gW=cw/n;
+  const barW=gW*0.28, gap=gW*0.07;
+  const y=v=>p.t+ch-v/maxV*ch;
+  const cols=[C.c1,C.web,C.mob];
+  const defs=se('defs');
+  [['Up',C.red],['Dn',C.teal]].forEach(([suf,col])=>{
+    const m=se('marker',{id:id+suf,viewBox:'0 0 8 8',refX:'7',refY:'4',markerWidth:'6',markerHeight:'6',orient:'auto'});
+    m.appendChild(se('path',{d:'M0 1 L8 4 L0 7 Z',fill:col}));
+    defs.appendChild(m);
+  });
+  svg.appendChild(defs);
+  [0,0.5,1].forEach(f=>{
+    const v=Math.round(maxV*f), yy=y(v);
+    svg.appendChild(se('line',{x1:p.l,y1:yy,x2:W-p.r,y2:yy,stroke:'#E8ECF2'}));
+    svg.appendChild(st(p.l-5,yy,v,{'font-size':'10','fill':C.gray,'text-anchor':'end'}));
+  });
+  sprints.forEach((_,i)=>{
+    if(i%2) return;
+    svg.appendChild(se('rect',{x:p.l+i*gW,y:p.t,width:gW,height:ch,fill:'#F3F6FA',rx:'4'}));
+  });
+  function stack(x, parts, op){
+    let acc=0;
+    parts.forEach((v,si)=>{
+      if(!v) return;
+      const y1=y(acc+v), y0=y(acc), h=Math.max(y0-y1,0);
+      const r=se('rect',{x,y:y1,width:barW,height:h,fill:cols[si],rx:'2'});
+      if(op<1) r.setAttribute('opacity', String(op));
+      svg.appendChild(r);
+      if(v>=6 && h>=13) svg.appendChild(st(x+barW/2, y1+h/2, v, {'font-size':'8','fill':'#fff','text-anchor':'middle','font-weight':'700'}));
+      acc+=v;
+    });
+  }
+  sprints.forEach((s,i)=>{
+    const gX=p.l+i*gW;
+    const xIn=gX+gW*0.16, xSt=xIn+barW+gap;
+    const created=[s.by['1С'].createdBugs,s.by.Web.createdBugs,s.by.Mobile.createdBugs];
+    const opened=[s.by['1С'].openBugs,s.by.Web.openBugs,s.by.Mobile.openBugs];
+    stack(xIn, created, 0.48);
+    stack(xSt, opened, 1);
+    svg.appendChild(st(xIn+barW/2, y(inflow[i])-9, inflow[i], {'font-size':'10','fill':C.dark,'text-anchor':'middle','font-weight':'700'}));
+    svg.appendChild(st(xSt+barW/2, y(stock[i])-9, stock[i], {'font-size':'10','fill':C.dark,'text-anchor':'middle','font-weight':'700'}));
+    const kept=closed[i]>=inflow[i], col=kept?C.teal:C.red;
+    const cxIn=xIn+barW/2, cxSt=xSt+barW/2, mid=(cxIn+cxSt)/2, ay=36;
+    const hrs=hoursOf(s.by), over=hrs>BUF_H, tcol=over?C.red:C.teal;
+    svg.appendChild(st(mid, 16, hrs+' ч', {'font-size':'10','fill':tcol,'text-anchor':'middle','font-weight':'700'}));
+    svg.appendChild(se('line',{x1:cxIn+4,y1:ay,x2:cxSt-7,y2:ay,stroke:col,'stroke-width':'1.5','marker-end':'url(#'+id+(kept?'Dn':'Up')+')'}));
+    svg.appendChild(st(mid, ay+14, 'закрыли '+closed[i], {'font-size':'9','fill':col,'text-anchor':'middle','font-weight':'700'}));
+    svg.appendChild(st(gX+gW/2, H-p.b+12, 'с '+s.name, {'font-size':'9','fill':C.gray,'text-anchor':'middle'}));
+    if(i===0){
+      svg.appendChild(st(xIn+barW/2, H-p.b+26, 'приток', {'font-size':'8','fill':C.gray,'text-anchor':'middle'}));
+      svg.appendChild(st(xSt+barW/2, H-p.b+26, 'склад', {'font-size':'8','fill':C.gray,'text-anchor':'middle'}));
+    }
+    if(i===4){
+      svg.appendChild(st(gX+gW/2, H-p.b+26, '33+47−53=27', {'font-size':'8','fill':C.teal,'text-anchor':'middle','font-weight':'700'}));
+    }
+  });
+}
+
+function stacked(id, labels, series, colors, opt={}){
+  const svg=document.getElementById(id);
+  const capPct=opt.capPct||null;
+  const showDelta=opt.delta!==false;
+  const W=520, H=capPct?315:(showDelta?285:250);
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  const p={t:showDelta?(capPct?60:42):22, r:12, b:54, l:36};
+  const cw=W-p.l-p.r, ch=H-p.t-p.b;
+  const n=labels.length, gW=cw/n;
+  const totals=labels.map((_,i)=>series.reduce((s,ser)=>s+ser[i],0));
+  const maxV=Math.max(...totals)*1.28||1;
+  const y=v=>p.t+ch-v/maxV*ch;
+  const defs=se('defs');
+  [['Up',C.red],['Dn',C.teal]].forEach(([suf,col])=>{
+    const m=se('marker',{id:id+suf,viewBox:'0 0 8 8',refX:'7',refY:'4',markerWidth:'6',markerHeight:'6',orient:'auto'});
+    m.appendChild(se('path',{d:'M0 1 L8 4 L0 7 Z',fill:col}));
+    defs.appendChild(m);
+  });
+  svg.appendChild(defs);
+  [0,0.5,1].forEach(f=>{
+    const v=Math.round(maxV*f), yy=y(v);
+    svg.appendChild(se('line',{x1:p.l,y1:yy,x2:W-p.r,y2:yy,stroke:'#E8ECF2'}));
+    svg.appendChild(st(p.l-5,yy,v,{'font-size':'10','fill':C.gray,'text-anchor':'end'}));
+  });
+  if(showDelta){
+    for(let i=1;i<n;i++){
+      const d=totals[i]-totals[i-1];
+      const x1=p.l+(i-1)*gW+gW/2, x2=p.l+i*gW+gW/2, yy=14;
+      const up=d>0, col=d===0?C.gray:(up?C.red:C.teal);
+      svg.appendChild(se('line',{x1:x1,y1:yy,x2:x2-7,y2:yy,stroke:col,'stroke-width':'1.6','marker-end':'url(#'+id+(d<0?'Dn':'Up')+')'}));
+      svg.appendChild(st((x1+x2)/2, yy-10, (d>0?'+':'')+d, {'font-size':'10','fill':col,'text-anchor':'middle','font-weight':'700'}));
+    }
+  }
+  if(capPct){
+    labels.forEach((_,i)=>{
+      const v=capPct[i], col=v>20?C.red:C.teal;
+      svg.appendChild(st(p.l+i*gW+gW/2, 38, v+'%', {'font-size':'10','fill':col,'text-anchor':'middle','font-weight':'700'}));
+    });
+  }
+  labels.forEach((l,i)=>{
+    let acc=0;
+    series.forEach((ser,si)=>{
+      const v=ser[i]; if(!v) return;
+      const y1=y(acc+v), y0=y(acc), h=y0-y1;
+      svg.appendChild(se('rect',{x:p.l+i*gW+gW*0.18,y:y1,width:gW*0.64,height:h,fill:colors[si],rx:'2'}));
+      if(v>=5 && h>=12){
+        svg.appendChild(st(p.l+i*gW+gW/2,y1+h/2,v,{'font-size':'9','fill':'#fff','text-anchor':'middle','font-weight':'700'}));
+      }
+      acc+=v;
+    });
+    if(totals[i]) svg.appendChild(st(p.l+i*gW+gW/2,y(totals[i])-8,totals[i],{'font-size':'10','fill':C.dark,'text-anchor':'middle','font-weight':'700'}));
+    svg.appendChild(st(p.l+i*gW+gW/2,H-p.b+14,'с '+l,{'font-size':'9','fill':C.gray,'text-anchor':'middle'}));
+  });
+  const names=['1С','Web','Mobile','Прочее'];
+  colors.forEach((col,i)=>{
+    if(i>=series.length) return;
+    const lx=p.l+i*90, ly=H-16;
+    svg.appendChild(se('rect',{x:lx,y:ly-5,width:9,height:9,fill:col,rx:'2'}));
+    svg.appendChild(st(lx+12,ly,names[i],{'font-size':'10','fill':C.dark,'text-anchor':'start'}));
+  });
+}
+
+function linePct(id, labels, s1, s2){
+  const svg=document.getElementById(id);
+  const W=760,H=220,p={t:16,r:16,b:36,l:36};
+  const cw=W-p.l-p.r,ch=H-p.t-p.b;
+  const x=i=>p.l+i/(labels.length-1)*cw;
+  const y=v=>p.t+ch-v/60*ch;
+  [0,20,40,60].forEach(v=>{
+    svg.appendChild(se('line',{x1:p.l,y1:y(v),x2:W-p.r,y2:y(v),stroke:'#E8ECF2'}));
+    svg.appendChild(st(p.l-5,y(v),v+'%',{'font-size':'10','fill':C.gray,'text-anchor':'end'}));
+  });
+  labels.forEach((l,i)=>svg.appendChild(st(x(i),H-p.b+14,l,{'font-size':'11','fill':C.gray,'text-anchor':'middle'})));
+  const p1=s1.map((v,i)=>x(i)+','+y(v)).join(' ');
+  const p2=s2.map((v,i)=>x(i)+','+y(v)).join(' ');
+  svg.appendChild(se('polyline',{points:p1,fill:'none',stroke:C.amber,'stroke-width':'2.3'}));
+  svg.appendChild(se('polyline',{points:p2,fill:'none',stroke:C.red,'stroke-width':'2.3'}));
+  s1.forEach((v,i)=>svg.appendChild(se('circle',{cx:x(i),cy:y(v),r:3.2,fill:C.amber})));
+  s2.forEach((v,i)=>svg.appendChild(se('circle',{cx:x(i),cy:y(v),r:3.2,fill:C.red})));
+}
+
+function fillTable(id, rows, cols){
+  document.getElementById(id).innerHTML=rows.map(r=>'<tr>'+cols.map(c=>'<td'+(c.num?' class="num"':'')+'>'+c.v(r)+'</td>').join('')+'</tr>').join('');
+}
+function delta(n){ return (n>0?'+':'')+n; }
+
+dualLine('dsQueue', LABELS, DS.bySprint.map(s=>s.openEnd), DS.bySprint.map(s=>s.openBugs), 280, 50);
+groupedCombo('dsCombo', DS.bySprint);
+linePct('dsShare', LABELS, DS.bySprint.map(s=>s.bugShareCreated), DS.bySprint.map(s=>s.bugShareOpen));
+
+dualLine('vbQueue', LABELS, VB.bySprint.map(s=>s.openEnd), VB.bySprint.map(s=>s.openBugs), 360, 50);
+stacked('vbCreated', LABELS, [
+  VB.bySprint.map(s=>s.by['1С'].createdBugs),
+  VB.bySprint.map(s=>s.by.Web.createdBugs),
+  VB.bySprint.map(s=>s.by.Mobile.createdBugs),
+  VB.bySprint.map(s=>s.by['Прочее'].createdBugs)
+], [C.c1, C.web, C.mob, '#8899AA']);
+stacked('vbOpenPlat', LABELS, [
+  VB.bySprint.map(s=>s.by['1С'].openBugs),
+  VB.bySprint.map(s=>s.by.Web.openBugs),
+  VB.bySprint.map(s=>s.by.Mobile.openBugs),
+  VB.bySprint.map(s=>s.by['Прочее'].openBugs)
+], [C.c1, C.web, C.mob, '#8899AA']);
+
+fillTable('dsTable', DS.bySprint, [
+  {v:r=>r.name},
+  {v:r=>r.created,num:1},{v:r=>r.closed,num:1},{v:r=>r.openEnd,num:1},
+  {v:r=>r.createdBugs,num:1},{v:r=>r.closedBugs,num:1},{v:r=>r.openBugs,num:1},
+  {v:r=>delta(r.net),num:1},{v:r=>delta(r.netBugs),num:1},{v:r=>r.bugShareOpen+'%',num:1}
+]);
+fillTable('dsPlatTable', DS.bySprint, [
+  {v:r=>r.name},
+  {v:r=>r.by['1С'].createdBugs,num:1},{v:r=>r.by['1С'].closedBugs,num:1},{v:r=>r.by['1С'].openBugs,num:1},
+  {v:r=>r.by.Web.createdBugs,num:1},{v:r=>r.by.Web.closedBugs,num:1},{v:r=>r.by.Web.openBugs,num:1},
+  {v:r=>r.by.Mobile.createdBugs,num:1},{v:r=>r.by.Mobile.closedBugs,num:1},{v:r=>r.by.Mobile.openBugs,num:1}
+]);
+fillTable('dsCapTable', DS.bySprint, [
+  {v:r=>r.name},
+  {v:r=>r.openBugs,num:1},
+  {v:r=>loadSP(r.by),num:1},
+  {v:r=>hoursOf(r.by),num:1},
+  {v:r=>fmtPpl(peopleOf(r.by)),num:1},
+  {v:r=>pct(r.by['1С'].openBugs*BUG_SP['1С'], CAP_SP['1С'])+'%',num:1},
+  {v:r=>pct(r.by.Web.openBugs*BUG_SP.Web, CAP_SP.Web)+'%',num:1},
+  {v:r=>pct(r.by.Mobile.openBugs*BUG_SP.Mobile, CAP_SP.Mobile)+'%',num:1},
+  {v:r=>{const p=pct(loadSP(r.by), CAP_SP.all); return p>20?'<b>'+p+'%</b>':p+'%';},num:1}
+]);
+fillTable('vbTable', VB.bySprint, [
+  {v:r=>r.name},
+  {v:r=>r.created,num:1},{v:r=>r.closed,num:1},{v:r=>r.openEnd,num:1},
+  {v:r=>r.createdBugs,num:1},{v:r=>r.closedBugs,num:1},{v:r=>r.openBugs,num:1},
+  {v:r=>delta(r.net),num:1},{v:r=>delta(r.netBugs),num:1},{v:r=>r.bugShareOpen+'%',num:1}
+]);
+</script>
+</body>
+</html>
