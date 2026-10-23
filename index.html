@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Анализ процесса разработки — Kaiten 16.10.2026</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1923;display:flex;align-items:center;justify-content:center;
+  height:100vh;overflow:hidden;font-family:'Inter','Segoe UI',Arial,sans-serif}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#scaler{position:absolute;width:1920px;height:1080px;transform-origin:top left}
+
+/* Slides */
+.slide{width:1920px;height:1080px;background:#F5F7FA;position:absolute;inset:0;
+  display:none;flex-direction:column;padding:28px 44px 14px;color:#142B4D;
+  opacity:0;transition:opacity .3s ease}
+.slide.active{display:flex}
+.slide.vis{opacity:1}
+
+/* Header */
+.sh{margin-bottom:12px;flex-shrink:0}
+.sh h1{font-size:28px;font-weight:800;color:#142B4D;line-height:1.2;letter-spacing:-.3px}
+.sh h2{font-size:16px;color:#555B66;margin-top:4px;font-weight:400}
+
+/* KPI */
+.krow{display:flex;gap:12px;margin-bottom:12px;flex-shrink:0}
+.kc{flex:1;background:#fff;border-radius:14px;padding:11px 15px;
+  box-shadow:0 2px 10px rgba(20,43,77,.09);border-top:4px solid #1F8A8A}
+.kc.kr{border-top-color:#C0392B}
+.kc.ka{border-top-color:#E08E0B}
+.kv{font-size:32px;font-weight:800;color:#142B4D;line-height:1;display:inline}
+.kb{font-size:16px;font-weight:700;margin-left:7px;display:inline-block;vertical-align:middle}
+.kbu{color:#C0392B}.kbd{color:#1F8A8A}
+.kl{font-size:15px;color:#555B66;margin-top:4px;line-height:1.3}
+
+/* Slide 1 body */
+.s1b{flex:1;display:flex;gap:14px;min-height:0}
+.s1L{flex:0 0 51%;display:flex;flex-direction:column;min-height:0}
+.s1R{flex:1;display:flex;flex-direction:column;gap:11px;min-height:0}
+
+/* Slide 2 body */
+.s2b{flex:1;display:flex;gap:14px;min-height:0}
+.s2L{flex:0 0 53%;display:flex;flex-direction:column;gap:9px;min-height:0}
+.s2R{flex:1;display:flex;flex-direction:column;gap:9px;min-height:0}
+
+/* Chart card */
+.cc{background:#fff;border-radius:14px;padding:12px 15px;
+  box-shadow:0 2px 10px rgba(20,43,77,.09);display:flex;flex-direction:column;min-height:0}
+.cc h3{font-size:17px;font-weight:700;color:#142B4D;margin-bottom:2px;flex-shrink:0}
+.hint{font-size:14px;color:#555B66;margin-bottom:7px;font-style:italic;flex-shrink:0}
+.cc-time h3{font-size:14px}
+.cc-time .hint{font-size:11px;line-height:1.35}
+.cc figure{flex:1;display:flex;flex-direction:column;min-height:0}
+.cc figure svg{flex:1;width:100%;min-height:0;display:block}
+
+/* Footer */
+.sf{font-size:13px;color:#9aa;margin-top:8px;border-top:1px solid #E0E4EA;
+  padding-top:6px;flex-shrink:0;line-height:1.4}
+
+/* Metric card */
+.mc{background:#fff;border-radius:14px;padding:11px 15px;
+  box-shadow:0 2px 10px rgba(20,43,77,.09);
+  display:flex;align-items:center;gap:12px;flex-shrink:0}
+.mcm{flex:1}
+.mcn{font-size:28px;font-weight:800;color:#C0392B;line-height:1}
+.mct{font-size:16px;font-weight:700;color:#142B4D;margin-top:2px}
+.mcs{font-size:14px;color:#555B66;margin-top:2px}
+.mcb{background:#FFF4F4;border:2px solid #C0392B;border-radius:10px;
+  padding:6px 10px;text-align:center;font-size:13px;color:#C0392B;
+  font-weight:700;line-height:1.5;flex-shrink:0}
+
+/* Gauges — stacked in right column */
+.grow{flex:1;display:flex;flex-direction:column;gap:9px;min-height:0}
+.gc{flex:1;background:#fff;border-radius:14px;padding:10px 14px 12px;
+  box-shadow:0 2px 10px rgba(20,43,77,.09);text-align:center;
+  display:flex;flex-direction:column;min-height:0}
+.gc figure{flex:0 0 auto}
+.gl{font-size:14px;color:#555B66;margin-top:2px}
+.gv{font-size:20px;font-weight:800}
+.gs{font-size:13px;color:#999}
+/* Gauge calculation detail */
+.gcdet{margin-top:8px;border-top:1px solid #EEF1F5;padding-top:7px;text-align:left}
+.gcdet-formula{font-size:13px;font-weight:700;color:#142B4D;
+  background:#F5F7FA;border-radius:6px;padding:4px 9px;margin-bottom:5px;
+  font-family:'Courier New',monospace;letter-spacing:-.2px;line-height:1.5}
+.gcdet-row{font-size:13px;color:#555B66;line-height:1.55;margin-bottom:2px}
+.gcdet-row b{color:#142B4D}
+.gcdet-src{font-size:12px;color:#999;margin-top:5px;
+  border-left:2px solid #DDE3EB;padding-left:7px;line-height:1.45}
+
+/* Caveats */
+.cav{font-size:13px;color:#888;background:#F8F9FA;border-radius:8px;
+  padding:7px 11px;margin-top:7px;border-left:3px solid #E0E4EA;
+  flex-shrink:0;line-height:1.35}
+.cav strong{color:#555B66}
+
+/* VSM + priority slides (s3, s4) */
+#s3,#s4{padding:22px 36px 12px}
+#s3 .sh,#s4 .sh{margin-bottom:8px}
+#s3 .sh h1{font-size:28px}
+#s3 .sh h2{font-size:16px;margin-top:3px}
+#s4 .sh h1{font-size:28px}
+
+.vsm{flex:0 0 auto;display:flex;flex-direction:column}
+.map{background:#fff;border-radius:14px;padding:14px 18px 12px;
+  box-shadow:0 2px 10px rgba(20,43,77,.08)}
+.read{font-size:15px;color:#555B66;line-height:1.45;margin-bottom:10px}
+.read b{color:#142B4D}
+.axis{display:flex;margin:0 0 4px 168px;margin-right:90px;font-size:13px;color:#888}
+.axis span{flex:1;text-align:center}
+.axis span:first-child{text-align:left}
+.axis span:last-child{text-align:right}
+.flow-row{display:flex;align-items:stretch;margin-bottom:10px}
+.flow-lab{width:160px;flex-shrink:0;padding-right:8px;display:flex;flex-direction:column;justify-content:center}
+.flow-lab .t{font-size:16px;font-weight:800;color:#142B4D;line-height:1.2}
+.flow-lab .s{font-size:14px;font-weight:700;margin-top:2px}
+.flow-lab .s.pmo{color:#1F8A8A}
+.flow-lab .s.dev{color:#5B7FA6}
+.flow-track{flex:1;min-width:0}
+.flow-bar{display:flex;height:56px;border-radius:6px;overflow:hidden}
+.seg{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#fff;text-align:center;padding:4px 6px;min-width:0}
+.seg .n{font-size:18px;font-weight:800;line-height:1.1}
+.seg .l{font-size:13px;font-weight:600;opacity:.95;line-height:1.2;margin-top:2px}
+.flow-tot{width:82px;flex-shrink:0;display:flex;align-items:center;padding-left:8px;
+  font-size:16px;font-weight:800;color:#142B4D}
+.leg{display:flex;flex-wrap:wrap;gap:8px 16px;margin:6px 0 0 160px}
+.leg i{display:inline-flex;align-items:center;gap:6px;font-style:normal;font-size:14px;color:#555B66}
+.leg i::before{content:'';width:10px;height:10px;border-radius:2px;background:var(--c);flex-shrink:0}
+
+.order{flex:1;min-height:0;margin-top:12px;background:#fff;border-radius:14px;
+  padding:12px 16px 14px;box-shadow:0 2px 10px rgba(20,43,77,.08);
+  display:flex;flex-direction:column;border-top:4px solid #1F8A8A}
+.order>h3{font-size:18px;font-weight:800;margin-bottom:8px;color:#142B4D}
+.order ol{margin:0;padding:0;list-style:none;flex:1;min-height:0;
+  display:flex;flex-direction:column}
+.order li{display:flex;gap:12px;align-items:flex-start;flex:1;
+  padding:6px 0;border-top:1px solid #E8ECF2}
+.order li:first-child{border-top:0;padding-top:0}
+.order .n{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#1F8A8A;
+  color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;
+  justify-content:center;margin-top:1px}
+.order .head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:2px}
+.order .head b{font-size:17px}
+.order li p{font-size:15px;line-height:1.4;color:#142B4D}
+.order .goal{color:#1F8A8A;margin-top:2px}
+.who{font-size:13px;font-weight:700;line-height:1.2;padding:2px 7px;border-radius:999px}
+.who.pmo{color:#1F8A8A;background:#E8F6F5}
+.who.dev{color:#142B4D;background:#EEF2F7}
+.who.both{color:#8A5A10;background:#FFF6E8}
+
+.card{background:#fff;border-radius:12px;padding:10px 14px;
+  box-shadow:0 2px 8px rgba(20,43,77,.08);flex:1;min-height:0}
+.card h3{font-size:13.5px;font-weight:800;margin-bottom:7px}
+table.mini{width:100%;border-collapse:collapse;font-size:11px}
+table.mini th{text-align:left;font-size:10px;color:#555B66;padding:3px 6px;
+  border-bottom:1px solid #E8ECF2}
+table.mini td{padding:4px 6px;border-bottom:1px solid #F0F2F5;vertical-align:top;line-height:1.35}
+table.mini td:first-child{font-weight:700;white-space:nowrap}
+
+.rice{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.rice-types{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;flex-shrink:0}
+.rice-type{background:#fff;border-radius:12px;padding:12px 16px;
+  box-shadow:0 2px 8px rgba(20,43,77,.08);border-top:4px solid #1F8A8A}
+.rice-type.bug{border-top-color:#E08E0B}
+.rice-type.exp{border-top-color:#C0392B}
+.rice-type h3{font-size:18px;font-weight:800;margin-bottom:5px}
+.rice-type p{font-size:16px;line-height:1.4;color:#142B4D}
+.rice-type .sub{font-size:14px;color:#555B66;margin-top:4px}
+.rice-formula{background:#fff;border-radius:12px;padding:12px 16px;
+  box-shadow:0 2px 8px rgba(20,43,77,.08);flex-shrink:0;
+  display:flex;align-items:center;justify-content:flex-start;gap:14px}
+.rice-formula .eq{font-size:22px;font-weight:800;color:#142B4D;flex-shrink:0}
+.rice-formula .eq b{color:#1F8A8A}
+.rice-formula .note{font-size:16px;color:#555B66;line-height:1.4}
+.rice-split{flex:0 0 auto;display:grid;grid-template-columns:1.25fr .75fr;gap:10px}
+.rice .card{flex:none;min-height:0;display:flex;flex-direction:column}
+.rice .card h3{flex-shrink:0;font-size:17px;margin-bottom:8px}
+.rice-mx{flex:1;min-height:0}
+.rice-mx table.mini{font-size:16px}
+.rice-mx table.mini th{font-size:13px}
+.rice-mx table.mini th,.rice-mx table.mini td{padding:9px 12px}
+.rice-mx table.mini td:first-child{white-space:nowrap}
+.rice-mx .hi{background:#E8F6F5;font-weight:700;color:#142B4D}
+.rice-mx .mid{background:#F7F9FB}
+.rice-mx .lo{color:#555B66}
+.rice-tie ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.rice-tie li{display:flex;gap:10px;align-items:flex-start}
+.rice-tie .n{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#1F8A8A;
+  color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;
+  justify-content:center;margin-top:1px}
+.rice-tie p{font-size:16px;line-height:1.4;color:#142B4D}
+.rice-mid{flex:0 0 auto}
+.rice-mid table.mini{font-size:15px}
+.rice-mid table.mini th{font-size:13px}
+.rice-mid table.mini th,.rice-mid table.mini td{padding:7px 10px}
+
+/* Nav */
+#nav{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:9px;z-index:999;
+  background:rgba(15,25,35,.6);backdrop-filter:blur(8px);
+  border-radius:28px;padding:7px 15px;border:1px solid rgba(255,255,255,.12)}
+.nd{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.3);
+  cursor:pointer;transition:background .2s}
+.nd.active{background:#fff}
+.nb{background:none;border:none;color:rgba(255,255,255,.8);font-size:18px;
+  cursor:pointer;padding:2px 7px;line-height:1;transition:color .2s}
+.nb:hover{color:#fff}
+.nc{color:#fff;font-size:12px;font-weight:700;min-width:22px;text-align:center}
+
+/* Print */
+@media print{
+  body,#stage{background:#fff!important}
+  #nav{display:none!important}
+  #stage{position:static!important;width:297mm!important;height:210mm!important}
+  #scaler{position:static!important;transform:none!important;
+    width:297mm!important;height:210mm!important}
+  .slide{position:static!important;display:flex!important;
+    width:297mm!important;height:210mm!important;opacity:1!important;
+    page-break-after:always;break-after:page;
+    print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div id="stage">
+ <div id="scaler">
+
+  <!-- ═══════ SLIDE 1 ═══════ -->
+  <section class="slide" id="s1" aria-label="Слайд 1: динамика очередей">
+   <div class="sh">
+    <h1>Очередь копится на входе, а исполнение разгружается</h1>
+    <h2 id="s1sub"></h2>
+   </div>
+   <div class="krow" id="krow"></div>
+   <div class="s1b">
+    <div class="s1L">
+     <div class="cc" style="flex:1">
+      <h3>Открытые карточки по дате замера</h3>
+      <p class="hint">Как читать: красная (ценности) растёт +117, бирюзовая (Downstream) упала −100 — входная очередь перегружена, исполнение разгружается</p>
+      <figure aria-label="Линейный график открытых карточек">
+       <svg id="lcSvg" viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet">
+        <title>Открытые карточки: ценности и Downstream по дате</title>
+        <desc>Ценности: 185→302 (+63%). Downstream: 205→105 (−49%)</desc>
+       </svg>
+      </figure>
+     </div>
+    </div>
+    <div class="s1R">
+     <div class="cc" style="flex:3">
+      <h3>Ценности: создано vs закрыто по спринтам</h3>
+      <p class="hint">Как читать: с 03.09 приток удвоился (73–78 карточек), закрытие не успевает — очередь растёт на ≈+29 карточек/спринт</p>
+      <figure aria-label="Сгруппированные столбцы создано/закрыто">
+       <svg id="gbSvg" viewBox="0 0 700 250" preserveAspectRatio="xMidYMid meet">
+        <title>Ценности: создано vs закрыто</title>
+       </svg>
+      </figure>
+     </div>
+     <div class="cc cc-time" style="flex:2">
+      <h3>Состав времени пути карточки (средние дни)</h3>
+      <p class="hint">
+       <strong style="color:#1F8A8A">↳ PM (доска ценностей):</strong>&nbsp;
+       <span style="color:#C0392B;font-weight:700">■ Ожидание в бэклоге</span> — карточка создана, ждёт очереди у PM.&nbsp;
+       <span style="color:#1F8A8A;font-weight:700">■ Проработка PM</span> — PM пишет требования, описание, план.&nbsp;
+       <span style="color:#5B7FA6;font-weight:700">■ Оценка и декомпозиция</span> — dev-команда оценивает задачу, разбивает на подзадачи (граница передачи в Downstream).
+       &nbsp;&nbsp;
+       <strong style="color:#5B7FA6">↳ DEV (Downstream):</strong>&nbsp;
+       <span style="color:#1A7A6A;font-weight:700">■ Написание кода</span> — разработчик активно пишет код.&nbsp;
+       <span style="color:#B0BEC5;font-weight:700">■ В очереди</span> — ожидание между этапами.&nbsp;
+       <span style="color:#E08E0B;font-weight:700">■ Очередь после разработки</span> — ожидание смены статусов: review → тест → деплой → приёмка.&nbsp;
+       <span style="color:#8B6BAE;font-weight:700">■ Ревью/тестирование</span> — активный code review и QA.
+      </p>
+      <figure aria-label="Горизонтальные полосы — состав времени цикла">
+       <svg id="sbSvg" viewBox="0 0 700 215" preserveAspectRatio="xMidYMid meet">
+        <title>Состав времени цикла по доскам</title>
+        <desc>Ценности: 23,7 дн. ожидание + 12,4 активная работа + 13,1 прочее = 49,2 дн. Downstream: 8,3 активная + 4,0 очередь + 10,1 очередь после разработки + 6,9 прочее = 29,3 дн.</desc>
+       </svg>
+      </figure>
+     </div>
+    </div>
+   </div>
+   <div class="sf" id="f1"></div>
+  </section>
+
+  <!-- ═══════ SLIDE 2 ═══════ -->
+  <section class="slide" id="s2" aria-label="Слайд 2: ограничения — линия 1С и мощность">
+   <div class="sh">
+    <h1>Ограничение — линия 1С и ожидание</h1>
+    <h2 id="s2sub"></h2>
+   </div>
+   <div class="s2b">
+    <div class="s2L">
+     <div class="cc" style="flex:1">
+      <h3>1С против Web: скорость и доля багов</h3>
+      <p class="hint">Чем длиннее полоса — тем лучше (скорость) или хуже (баги). 1С закрывает в 1,5× медленнее Web. У Web и Mobile — высокая доля багов.</p>
+      <figure aria-label="Парные горизонтальные столбцы 1С vs Web">
+       <svg id="pbSvg" viewBox="0 0 650 190" preserveAspectRatio="xMidYMid meet">
+        <title>1С vs Web: скорость закрытия и доля багов</title>
+       </svg>
+      </figure>
+     </div>
+     <div class="mc">
+      <div class="mcm">
+       <div class="mcn" id="mc1cs"></div>
+       <div class="mct">открытых карточек Downstream — линия 1С</div>
+       <div class="mcs">Спринт <strong id="mc1cper"></strong>: создано <strong id="mc1cc"></strong>, закрыто ≈<strong id="mc1ccl"></strong> — очередь растёт</div>
+      </div>
+      <figure aria-label="Мини-диаграмма 1С" style="flex-shrink:0">
+       <svg id="mbSvg" viewBox="0 0 110 80" style="width:100px;height:80px">
+        <title>1С создано vs закрыто</title>
+       </svg>
+      </figure>
+      <div class="mcb" id="mc1cb"></div>
+     </div>
+     <div class="cav" id="cav"></div>
+    </div>
+    <div class="s2R">
+     <div style="font-size:14px;color:#888;font-style:italic;flex-shrink:0">
+      Спидометры: дуга = заполненность относительно нормы. Полная красная дуга = норма превышена. Спринт = 2 недели.
+     </div>
+     <div class="grow">
+      <div class="gc">
+       <figure aria-label="Спидометр Web загрузка">
+        <svg id="g1Svg" viewBox="0 0 200 118" style="width:100%;max-height:128px">
+         <title>Web: загрузка ёмкости</title>
+        </svg>
+       </figure>
+       <div class="gl">Web-команда</div>
+       <div class="gv" style="color:#C0392B" id="gWv"></div>
+       <div class="gs" id="gWs"></div>
+       <div class="gcdet" id="gWdet"></div>
+      </div>
+      <div class="gc">
+       <figure aria-label="Спидометр 1С очередь">
+        <svg id="g2Svg" viewBox="0 0 200 118" style="width:100%;max-height:128px">
+         <title>1С: очередь в спринтах</title>
+        </svg>
+       </figure>
+       <div class="gl">Линия 1С</div>
+       <div class="gv" style="color:#C0392B" id="g1Cv"></div>
+       <div class="gs">норма ≤ 1 спринта (2 нед.)</div>
+       <div class="gcdet" id="g1Cdet"></div>
+      </div>
+     </div>
+    </div>
+   </div>
+   <div class="sf" id="f2"></div>
+  </section>
+
+  <!-- ═══════ SLIDE 3: Current-state VSM ═══════ -->
+  <section class="slide" id="s3" aria-label="Слайд 3: карта текущего состояния">
+    <div class="sh">
+      <h1>Карта потока создания ценности — текущее состояние</h1>
+      <h2>Сквозной путь «идея → продукт у клиента» через PMO и команду разработки · данные Kaiten на 16.10.2026</h2>
+    </div>
+    <div class="vsm">
+      <div class="map">
+        <div class="read">
+          <b>PMO (доска ценностей):</b> ожидание в бэклоге — карточка создана, ждёт PM.
+          Проработка PM — требования и план.
+          Оценка и декомпозиция — граница передачи в Downstream.
+          &nbsp;·&nbsp;
+          <b>DEV (Downstream):</b> написание кода — активная работа.
+          В очереди — ожидание между этапами.
+          Очередь после разработки — review → тест → деплой → приёмка.
+          Ревью / тестирование — активный QA.
+        </div>
+        <div class="axis"><span>0</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50 дней</span></div>
+
+        <div class="flow-row">
+          <div class="flow-lab">
+            <span class="t">Ценности (46,7 дн.)</span>
+            <span class="s pmo">↳ PMO</span>
+          </div>
+          <div class="flow-track">
+          <div class="flow-bar" style="width:93.4%">
+            <div class="seg" style="flex:4.8;background:#C0392B"><div class="n">4,8</div><div class="l">ожидание</div></div>
+            <div class="seg" style="flex:10.4;background:#1F8A8A"><div class="n">10,4</div><div class="l">проработка PM</div></div>
+            <div class="seg" style="flex:5.9;background:#5B7FA6"><div class="n">5,9</div><div class="l">оценка</div></div>
+            <div class="seg" style="flex:25.6;background:#7B9EBC"><div class="n">25,6</div><div class="l">в разработке (DS)</div></div>
+          </div>
+          </div>
+          <div class="flow-tot">46,7 дн.</div>
+        </div>
+
+        <div class="flow-row">
+          <div class="flow-lab">
+            <span class="t">Downstream (22,9 дн.)</span>
+            <span class="s dev">↳ DEV</span>
+          </div>
+          <div class="flow-track">
+          <div class="flow-bar" style="width:45.8%">
+            <div class="seg" style="flex:3.8;background:#1A7A6A"><div class="n">3,8</div><div class="l">код</div></div>
+            <div class="seg" style="flex:5.8;background:#B0BEC5;color:#142B4D"><div class="n">5,8</div><div class="l">в очереди</div></div>
+            <div class="seg" style="flex:9.7;background:#E08E0B"><div class="n">9,7</div><div class="l">после разработки</div></div>
+            <div class="seg" style="flex:3.6;background:#8B6BAE"><div class="n">3,6</div><div class="l">ревью / тест</div></div>
+          </div>
+          </div>
+          <div class="flow-tot">22,9 дн.</div>
+        </div>
+        <div class="leg">
+          <i style="--c:#C0392B">Ожидание (бэклог PMO)</i>
+          <i style="--c:#1F8A8A">Проработка PM</i>
+          <i style="--c:#5B7FA6">Оценка и декомпозиция</i>
+          <i style="--c:#7B9EBC">В разработке (на доске ценностей)</i>
+          <i style="--c:#1A7A6A">Написание кода</i>
+          <i style="--c:#B0BEC5">В очереди</i>
+          <i style="--c:#E08E0B">Очередь после разработки</i>
+          <i style="--c:#8B6BAE">Ревью / тестирование</i>
+        </div>
+      </div>
+    </div>
+    <div class="order" aria-label="Дальнейшие действия">
+      <h3>Дальнейшие действия</h3>
+      <ol>
+        <li>
+          <span class="n" aria-hidden="true">1</span>
+          <div>
+            <div class="head"><b>Приоритезация</b><span class="who pmo">PMO</span></div>
+            <p>Разобрать 114 карточек в «Приоритезация / Готово» и 121 карточку старше 90 дней: взять в работу, отложить с датой или закрыть.</p>
+            <p class="goal">В этой колонке одновременно не больше 20 карточек. За 2 недели старых (лежат 90+ дней) останется не больше 60.</p>
+          </div>
+        </li>
+        <li>
+          <span class="n" aria-hidden="true">2</span>
+          <div>
+            <div class="head"><b>Ёмкость 1С</b><span class="who both">PMO + Dev</span></div>
+            <p>Не отдавать в разработку больше, чем команда успеет за спринт. Пока очередь длиннее спринта — новые карточки не добавлять.</p>
+            <p class="goal">1С: 384 ч на продукт и 96 ч на баги. Очередь — не длиннее одного спринта (сейчас два).</p>
+          </div>
+        </li>
+        <li>
+          <span class="n" aria-hidden="true">3</span>
+          <div>
+            <div class="head"><b>Разные правила для задач</b><span class="who pmo">PMO</span></div>
+            <p>Продукт, баг и срочное идут по разным правилам. Срочный баг не выкидывает продуктовую задачу без явного решения PMO.</p>
+            <p class="goal">Среди закрытых задач баги — не больше четверти.</p>
+          </div>
+        </li>
+        <li>
+          <span class="n" aria-hidden="true">4</span>
+          <div>
+            <div class="head"><b>Оценка: 1 SP = 4 часа</b><span class="who dev">Dev</span></div>
+            <p>Принимаем в работу по аналитике Kaiten: 1 story point = 4 часа (полдня одного разработчика). Спринт человека — 80 ч = 20 SP, шестеро 1С — 120 SP на спринт. Проставить оценку на 28 карточек 1С без размера.</p>
+            <p class="goal">У каждой активной карточки 1С есть оценка. В «Готово» — дата закрытия, иначе очередь снова считают на глаз.</p>
+          </div>
+        </li>
+        <li>
+          <span class="n" aria-hidden="true">5</span>
+          <div>
+            <div class="head"><b>Буфер спринта 80 / 20</b><span class="who dev">Dev</span></div>
+            <p>80% спринта — запланированная ценность. 20% заранее оставляем на баги, срочное и замечания. Эту квоту нельзя заранее забить фичами.</p>
+            <p class="goal">1С: 384 ч продукт + 96 ч буфер. Web: 512 ч продукт + 128 ч буфер.</p>
+          </div>
+        </li>
+        <li>
+          <span class="n" aria-hidden="true">6</span>
+          <div>
+            <div class="head"><b>Обратная связь</b><span class="who both">PMO + Dev</span></div>
+            <p>После кода и на доске ценностей ответ заказчику — не дольше 3 дней. «Берём / не берём», замечание с приёмки и баг сразу возвращаются в портфель PMO, а не копятся до релиза.</p>
+            <p class="goal">Карточка не висит неделями в «почти готово».</p>
+          </div>
+        </li>
+        <li>
+          <span class="n" aria-hidden="true">7</span>
+          <div>
+            <div class="head"><b>Руководитель разработки и единый отчёт</b><span class="who both">PMO + Dev</span></div>
+            <p>Добавить руководителя команды разработки. Операционные KPI — очередь, ёмкость, доля багов, срок обратной связи — вывести на одну информационную панель / отчёт, чтобы PMO и Dev смотрели одни цифры.</p>
+            <p class="goal">Один отчёт на спринт вместо разрозненных выгрузок из Kaiten.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ═══════ SLIDE 4: priority matrix ═══════ -->
+  <section class="slide" id="s4" aria-label="Слайд 4: приоритезация по матрице">
+    <div class="sh">
+      <h1>Как проектный отдел считает приоритет</h1>
+    </div>
+    <div class="rice">
+      <div class="rice-types">
+        <div class="rice-type">
+          <h3>Продукт</h3>
+          <p>Новая ценность. PMO ставит ценность, разработка — размер. Смотрим клетку матрицы и отдаём сверху вниз, не больше ёмкости спринта.</p>
+        </div>
+        <div class="rice-type bug">
+          <h3>Баг</h3>
+          <p>Живёт в буфере 20% спринта. Считаем по критичности, в матрицу не кладём.</p>
+        </div>
+        <div class="rice-type exp">
+          <h3>Срочное</h3>
+          <p>Только явным решением PMO. Съедает буфер, не продуктовую очередь. Не ломаем работу в коде.</p>
+        </div>
+      </div>
+
+      <div class="rice-formula">
+        <div class="eq">Клетка = приоритет</div>
+        <p class="note">Ценность: слабый / средний / сильный. Размер: S до 2 SP · M 3–5 SP · L 8 SP и больше. Нет постановки — в матрицу не кладём.</p>
+      </div>
+
+      <div class="rice-split">
+        <div class="card rice-mx">
+          <h3>Матрица продукта</h3>
+          <table class="mini">
+            <tr><th></th><th>S · до 2 SP</th><th>M · 3–5 SP</th><th>L · 8 SP и больше</th></tr>
+            <tr><td>Сильный</td><td class="hi">Брать первыми</td><td class="hi">Во вторую очередь</td><td class="mid">Делить или откладывать</td></tr>
+            <tr><td>Средний</td><td class="hi">Во вторую очередь</td><td class="mid">Очередь продукта</td><td class="lo">Только если есть ёмкость</td></tr>
+            <tr><td>Слабый</td><td class="mid">Мелочь в хвост спринта</td><td class="lo">Не отдавать, пока очередь &gt; 1 спринта</td><td class="lo">Не брать</td></tr>
+          </table>
+        </div>
+        <div class="card rice-tie">
+          <h3>Если размер одинаковый</h3>
+          <ol>
+            <li>
+              <span class="n" aria-hidden="true">1</span>
+              <p>Есть SP — меньше SP выше. Две карточки M, 3 SP и 5 SP: сначала 3 SP.</p>
+            </li>
+            <li>
+              <span class="n" aria-hidden="true">2</span>
+              <p>SP нет или тоже равны — кто раньше получил готовую постановку.</p>
+            </li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="rice-mid">
+        <div class="card">
+          <h3>Что делать на этапах карты потока</h3>
+          <table class="mini">
+            <tr><th>Этап карты</th><th>Проектный отдел</th><th>От разработки</th></tr>
+            <tr><td>Ожидание · 4,8 дн.</td><td>Тип: продукт / баг / срочное. Взять, отложить датой или закрыть. В матрицу ещё не кладём.</td><td>Ничего</td></tr>
+            <tr><td>Проработка PM · 10,4 дн.</td><td>Готова постановка — да / нет. Если да, ставит ценность: слабый / средний / сильный.</td><td>Грубо: S / M / L или «влезает в спринт / нет»</td></tr>
+            <tr><td>Оценка · 5,9 дн.</td><td>Кладёт карточку в клетку. Если в клетке несколько — правило справа.</td><td>Точный SP и что вытеснится, если взять эту</td></tr>
+            <tr><td>Downstream и приёмка</td><td>Карточки в коде не переставляет. Новая сильная S вытесняет нижнюю из готовых, не из работы.</td><td>Когда задачу закрыли — ставят дату в «Готово / Готово», иначе очередь снова считают на глаз. Если после кода пришло замечание или баг с приёмки — отвечаем заказчику за 3 дня и берём это из буфера 20%, а не как новую продуктовую задачу сверху.</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+ </div>
+</div>
+
+<nav id="nav" aria-label="Навигация">
+ <button class="nb" id="pb" aria-label="Назад">&#8592;</button>
+ <span class="nd" data-n="0"></span>
+ <span class="nd" data-n="1"></span>
+ <span class="nd" data-n="2"></span>
+ <span class="nd" data-n="3"></span>
+ <span class="nc" id="nc">1/4</span>
+ <button class="nb" id="nb" aria-label="Вперёд">&#8594;</button>
+</nav>
+
+<script>
+/* ── DATA ── */
+const DATA = {
+  asOf:"19.10.2026",
+  queueDates:["28.05","11.06","25.06","09.07","23.07","06.08","20.08","03.09","17.09","01.10","19.10"],
+  openValueBoard:[185,204,208,237,239,255,227,228,268,296,339],
+  openDownstream:[205,225,138,201,211,159,150,119,130,92,106],
+  sprints:["28.05","11.06","25.06","09.07","23.07","06.08","20.08","03.09","17.09","01.10"],
+  valueCreated:[35,32,52,35,37,31,37,73,66,78],
+  valueClosed: [15,28,22,22,25,58,34,30,36,66],
+  downstreamCreated:[73,36,106,59,88,51,71,86,75,112],
+  downstreamClosed: [53,129,43,49,133,60,102,77,113,99],
+  kpi:{
+    valueBoardOpen:339, valueBoardChangePct:83,
+    downstreamOpen:106, downstreamChangePct:-48,
+    inflowFirst4:38, inflowLast3:72,
+    waitingForStart:160, olderThan90:121, openTotalValue:339,
+    closedPerSprintDownstream:89, createdPerSprintDownstream:76
+  },
+  timeValue:{total:46.7, waitBeforeDev:4.8, active:10.4, other:5.9, inDev:25.6},
+  timeDownstream:{total:22.9, active:3.8, queue:5.8, tailAfterDev:9.7, other:3.6},
+  lines:{
+    openShare1C:54,
+    closedWithin19d:{c1:60, web:61},
+    bugShareClosed:{c1:13, web:35, mobile:52},
+    bugShareCreatedDownstream:33,
+    created1CLastPeriod:45, closed1CPerSprint:25,
+    lastSprintStart:"01.10", lastSprintEnd:"19.10.2026"
+  },
+  capacity:{
+    webClosedHours:664, webNominalHours:640, webLoadPct:104,
+    c1QueueSprintsBySP:2.0,
+    c1DeficitTable:"2,4–3,8 чел. (по таблице в единицах, требует проверки по SP)"
+  },
+  recommendations:[
+    {n:1,p:1,title:"Установить WIP-лимит колонки «Готово к разработке»",
+     why:"160 карточек готовы к разработке, 121 из 339 открытых старше 90 дней. Существующий еженедельный разбор — добавить в повестку: просмотр карточек 90+ дней и решение «закрыть или взять»",
+     metric:"Карточек старше 90 дней — вдвое меньше (≤60)",term:"2 недели"},
+    {n:2,p:1,title:"Правило «вход вместо замены» для доски ценностей",
+     why:"Доска ценностей растёт: в последних 3 спринтах создаётся ≈72/спр, закрывается ≈44/спр (+28 нетто). Downstream справляется: закрывает 89 vs создаёт 76/спр",
+     metric:"Создано / закрыто ≤ 1 на доске ценностей три спринта подряд",term:"Сразу"},
+    {n:3,p:2,title:"Лимит задач в работе по линиям и приоритет по классам",
+     why:"Сократить время цикла. Web и 1С закрывают за 19 дней только 61% и 60% задач",
+     metric:"Доля закрытых за 19 дней > 75% для Web и 1С",term:"2–4 недели"},
+    {n:4,p:2,title:"Срок на релиз и обратную связь — не более 3 дней",
+     why:"Очередь после разработки — крупнейший сегмент Downstream (11,6 дн. ожидания статусов Ready→Done)",
+     metric:"Очередь после разработки ≤ 3 дней",term:"2 недели"},
+    {n:5,p:2,title:"Снижение доли багов в Web и Mobile",
+     why:"Web: 35% закрытых — баги; Mobile (теги mobile/app): 52% багов среди 229 карточек на 4 дорожках",
+     metric:"Доля багов ≤ 25%",term:"Квартал"},
+    {n:6,p:3,title:"Единый размер задачи и запрет пачечного закрытия",
+     why:"Размер заполнен у 10% ценностей и 68% Downstream — нет данных для прогноза",
+     metric:"Размер у 90% карточек",term:"Месяц"},
+    {n:7,p:3,title:"Решение по кадрам в 1С и Flutter — после 6 спринтов данных в SP",
+     why:"Flutter: 67% закрытых — баги (24 карточки, n мал). 1С: очередь ≈2 спринта SP",
+     metric:"Решение на данных",term:"6 спринтов"}
+  ],
+  caveats:[
+    "Размеры в разных единицах (SP в 1С, часы в Web) — объём по линиям сравнивать нельзя.",
+    "Массовые закрытия (29.07: 62; 05.08: 53; 21.09: 56 карточек) — ориентироваться на тренд.",
+    "Доли Node.js/React/Flutter в майском снимке частично восстановлены."
+  ],
+  sources:"Выгрузки Kaiten 16.10.2026: доска ценностей (778 карточек; 439 завершённых, 339 открытых), Downstream 2.0 (1132 карточки; 1023 завершённых, 106 открытых). Mobile = карточки с тегами mobile/app/flutter (229 закрытых на 4 дорожках)."
+};
+
+/* ── Palette ── */
+const C={dark:'#142B4D',teal:'#1F8A8A',red:'#C0392B',
+  amber:'#E08E0B',gray:'#555B66',lg:'#DDE3EB',white:'#FFFFFF'};
+
+/* ── SVG helpers ── */
+const NS='http://www.w3.org/2000/svg';
+function se(tag,a={}){
+  const el=document.createElementNS(NS,tag);
+  for(const[k,v]of Object.entries(a))el.setAttribute(k,v);
+  return el;
+}
+function st(x,y,txt,a={}){
+  const el=se('text',{x,y,'dominant-baseline':'middle','text-anchor':'middle',...a});
+  el.textContent=txt;
+  return el;
+}
+function stspan(x,y,lines,a={}){
+  // multi-line SVG text via tspan
+  const el=se('text',{x,y,...a});
+  lines.forEach((ln,i)=>{
+    const ts=se('tspan',{x,dy:i===0?0:14});
+    ts.textContent=ln;
+    el.appendChild(ts);
+  });
+  return el;
+}
+
+/* ════════════════════════════════════
+   LINE CHART
+════════════════════════════════════ */
+function drawLineChart(id,labels,series){
+  const svg=document.getElementById(id);
+  const W=720,H=360,p={t:40,r:28,b:44,l:50};
+  const cw=W-p.l-p.r, ch=H-p.t-p.b;
+  const allV=series.flatMap(s=>s.d);
+  const maxY=Math.ceil(Math.max(...allV)/50)*50;
+  const xS=i=>p.l+i/(labels.length-1)*cw;
+  const yS=v=>p.t+ch-v/maxY*ch;
+
+  // grid y
+  for(let i=0;i<=6;i++){
+    const v=Math.round(maxY*i/6),y=yS(v);
+    svg.appendChild(se('line',{x1:p.l,y1:y,x2:W-p.r,y2:y,stroke:'#E8ECF2','stroke-width':'1'}));
+    svg.appendChild(st(p.l-6,y,v,{'font-size':'14','fill':C.gray,'text-anchor':'end','dominant-baseline':'middle'}));
+  }
+  // x labels
+  labels.forEach((l,i)=>{
+    const x=xS(i);
+    svg.appendChild(se('line',{x1:x,y1:H-p.b,x2:x,y2:H-p.b+4,stroke:C.lg}));
+    svg.appendChild(st(x,H-p.b+14,l,{'font-size':'13','fill':C.gray,'dominant-baseline':'hanging'}));
+  });
+  // axes
+  svg.appendChild(se('line',{x1:p.l,y1:p.t,x2:p.l,y2:H-p.b,stroke:C.lg,'stroke-width':'1.5'}));
+  svg.appendChild(se('line',{x1:p.l,y1:H-p.b,x2:W-p.r,y2:H-p.b,stroke:C.lg,'stroke-width':'1.5'}));
+
+  series.forEach(s=>{
+    // area
+    const pts=s.d.map((v,i)=>`${xS(i)},${yS(v)}`).join(' ');
+    const aPts=`${xS(0)},${H-p.b} ${pts} ${xS(s.d.length-1)},${H-p.b}`;
+    svg.appendChild(se('polygon',{points:aPts,fill:s.color,opacity:'.07'}));
+    // line
+    svg.appendChild(se('polyline',{points:pts,fill:'none',stroke:s.color,'stroke-width':'2.5','stroke-linejoin':'round','stroke-linecap':'round'}));
+    // dots + first/last labels
+    s.d.forEach((v,i)=>{
+      const x=xS(i),y=yS(v);
+      svg.appendChild(se('circle',{cx:x,cy:y,r:'4',fill:s.color}));
+      if(i===0||i===s.d.length-1){
+        const anc=i===0?'start':'end',dx=i===0?7:-7;
+        const t=se('text',{x:x+dx,y:y-11,'font-size':'15','font-weight':'700',
+          'fill':s.color,'text-anchor':anc,'dominant-baseline':'auto'});
+        t.textContent=v;
+        svg.appendChild(t);
+      }
+    });
+  });
+
+  // legend — сверху графика, горизонтально
+  const ly=16;
+  let lx=p.l;
+  series.forEach((s,i)=>{
+    if(i)lx+=28;
+    svg.appendChild(se('line',{x1:lx,y1:ly,x2:lx+16,y2:ly,stroke:s.color,'stroke-width':'2.5'}));
+    svg.appendChild(se('circle',{cx:lx+8,cy:ly,r:'4',fill:s.color}));
+    const t=se('text',{x:lx+20,y:ly,'font-size':'14','fill':C.dark,'dominant-baseline':'middle'});
+    t.textContent=s.label;
+    svg.appendChild(t);
+    lx+=20+s.label.length*8.2;
+  });
+}
+
+/* ════════════════════════════════════
+   GROUPED BARS (value board)
+════════════════════════════════════ */
+function drawGroupedBars(id,labels,series){
+  const svg=document.getElementById(id);
+  const W=700,H=250,p={t:26,r:14,b:42,l:38};
+  const cw=W-p.l-p.r,ch=H-p.t-p.b;
+  const n=labels.length,ns=series.length;
+  const gW=cw/n;
+  const maxV=Math.ceil(Math.max(...series.flatMap(s=>s.d))/10)*10;
+  const yS=v=>p.t+ch-v/maxV*ch;
+
+  // y grid
+  [0,20,40,60,80].filter(v=>v<=maxV).forEach(v=>{
+    const y=yS(v);
+    svg.appendChild(se('line',{x1:p.l,y1:y,x2:W-p.r,y2:y,stroke:'#E8ECF2','stroke-width':'1'}));
+    svg.appendChild(st(p.l-5,y,v,{'font-size':'13','fill':C.gray,'text-anchor':'end','dominant-baseline':'middle'}));
+  });
+  // axes
+  svg.appendChild(se('line',{x1:p.l,y1:p.t,x2:p.l,y2:H-p.b,stroke:C.lg,'stroke-width':'1.5'}));
+  svg.appendChild(se('line',{x1:p.l,y1:H-p.b,x2:W-p.r,y2:H-p.b,stroke:C.lg,'stroke-width':'1.5'}));
+
+  const bW=gW*0.38;
+  labels.forEach((lbl,gi)=>{
+    const gx=p.l+gi*gW+gW/2;
+    series.forEach((s,si)=>{
+      const bx=gx+(si-ns/2+.5)*bW*1.4;
+      const v=s.d[gi],y=yS(v),bh=H-p.b-y;
+      svg.appendChild(se('rect',{x:bx-bW/2,y,width:bW,height:bh,fill:s.color,rx:'3'}));
+      if(bh>15){
+        const t=se('text',{x:bx,y:y-5,'font-size':'13','font-weight':'700','fill':s.color,
+          'text-anchor':'middle','dominant-baseline':'auto'});
+        t.textContent=v;
+        svg.appendChild(t);
+      }
+    });
+    const t=se('text',{x:gx,y:H-p.b+6,'font-size':'13','fill':C.gray,
+      'text-anchor':'middle','dominant-baseline':'hanging'});
+    t.textContent=lbl;
+    svg.appendChild(t);
+  });
+
+  // annotation bracket over last 3 sprints (idx 7,8,9)
+  const x7=p.l+7*gW, x9=p.l+10*gW-2, ay=p.t-8;
+  svg.appendChild(se('line',{x1:x7,y1:ay,x2:x9,y2:ay,stroke:C.red,'stroke-width':'1.5'}));
+  svg.appendChild(se('line',{x1:x7,y1:ay,x2:x7,y2:ay+5,stroke:C.red,'stroke-width':'1.5'}));
+  svg.appendChild(se('line',{x1:x9,y1:ay,x2:x9,y2:ay+5,stroke:C.red,'stroke-width':'1.5'}));
+  const at=se('text',{x:(x7+x9)/2,y:ay-3,'font-size':'14','font-weight':'700','fill':C.red,
+    'text-anchor':'middle','dominant-baseline':'auto'});
+  at.textContent='↑ с 03.09 приток вырос вдвое';
+  svg.appendChild(at);
+
+  // legend
+  series.forEach((s,i)=>{
+    const lx=p.l+i*130,ly=H-8;
+    svg.appendChild(se('rect',{x:lx,y:ly-6,width:11,height:11,fill:s.color,rx:'2'}));
+    const t=se('text',{x:lx+15,y:ly-0.5,'font-size':'13','fill':C.dark,'dominant-baseline':'middle'});
+    t.textContent=s.label;
+    svg.appendChild(t);
+  });
+}
+
+/* ════════════════════════════════════
+   STACKED HORIZONTAL BARS (time cycle)
+════════════════════════════════════ */
+function drawStackedBars(id,rows){
+  const svg=document.getElementById(id);
+  const W=700,H=215,p={t:30,r:16,b:66,l:120};
+  const cw=W-p.l-p.r;
+  const maxT=Math.max(...rows.map(r=>r.total));
+  const bH=30,gap=24;
+
+  // x ticks
+  [0,10,20,30,40,50].filter(v=>v<=maxT+1).forEach(v=>{
+    const x=p.l+v/maxT*cw;
+    svg.appendChild(se('line',{x1:x,y1:p.t-8,x2:x,
+      y2:p.t+rows.length*(bH+gap)-gap+2,stroke:'#E8ECF2','stroke-width':'1'}));
+    const t=se('text',{x,y:p.t-12,'font-size':'10','fill':C.gray,
+      'text-anchor':'middle','dominant-baseline':'auto'});
+    t.textContent=v;
+    svg.appendChild(t);
+  });
+  const xt=se('text',{x:p.l+cw/2,y:p.t-22,'font-size':'10','fill':C.gray,
+    'text-anchor':'middle','dominant-baseline':'auto'});
+  xt.textContent='дней';
+  svg.appendChild(xt);
+
+  rows.forEach((row,ri)=>{
+    const y=p.t+ri*(bH+gap);
+    // row label — two lines + owner badge
+    const lblLines=row.label.split('\n');
+    const baseY=y+bH/2-(lblLines.length-1)*7;
+    lblLines.forEach((ln,li)=>{
+      const t=se('text',{x:p.l-8,y:baseY+li*14,'text-anchor':'end',
+        'dominant-baseline':'middle','font-size':'12','fill':C.dark,'font-weight':'700'});
+      t.textContent=ln;
+      svg.appendChild(t);
+    });
+    // owner badge (PM / DEV)
+    if(row.owner){
+      const ow=se('text',{x:p.l-8,y:baseY+lblLines.length*14+2,'text-anchor':'end',
+        'dominant-baseline':'hanging','font-size':'9.5','font-weight':'700',
+        'fill':row.owner==='PM'?'#1F8A8A':'#5B7FA6'});
+      ow.textContent='↳ '+row.owner;
+      svg.appendChild(ow);
+    }
+    // total label
+    const tot=se('text',{x:p.l+row.total/maxT*cw+5,y:y+bH/2,'dominant-baseline':'middle',
+      'font-size':'11','fill':C.gray});
+    tot.textContent=row.total+' дн.';
+    svg.appendChild(tot);
+
+    // segments
+    let cx=p.l;
+    row.segs.forEach((seg,si)=>{
+      const sw=seg.value/maxT*cw;
+      if(sw<1)return;
+      const r=se('rect',{x:cx,y,width:sw,height:bH,fill:seg.color});
+      if(si===0)r.setAttribute('rx','4');
+      svg.appendChild(r);
+      // value inside segment
+      if(sw>24){
+        const t=se('text',{x:cx+sw/2,y:y+bH/2,'font-size':'11','font-weight':'700',
+          'fill':'#fff','text-anchor':'middle','dominant-baseline':'middle'});
+        t.textContent=seg.value;
+        svg.appendChild(t);
+      }
+      // active annotation (above bar) — use custom label if provided
+      if(seg.active){
+        const pct=Math.round(seg.value/row.total*100);
+        const ax=cx+sw/2;
+        const aColor=seg.activeColor||C.teal;
+        svg.appendChild(se('line',{x1:ax,y1:y-1,x2:ax,y2:y-13,stroke:aColor,'stroke-width':'1.5'}));
+        const at=se('text',{x:ax,y:y-16,'font-size':'10','font-weight':'700','fill':aColor,
+          'text-anchor':'middle','dominant-baseline':'auto'});
+        at.textContent=(seg.activeLabel||'Активная')+' ≈'+pct+'%';
+        svg.appendChild(at);
+      }
+      // direct label for tail (amber)
+      if(seg.tail){
+        const ax=cx+sw/2;
+        svg.appendChild(se('line',{x1:ax,y1:y+bH+1,x2:ax,y2:y+bH+12,stroke:C.amber,'stroke-width':'1.5'}));
+        const at=se('text',{x:ax,y:y+bH+22,'font-size':'10','font-weight':'700','fill':C.amber,
+          'text-anchor':'middle','dominant-baseline':'hanging'});
+        at.textContent='очередь после разработки';
+        svg.appendChild(at);
+      }
+      cx+=sw;
+    });
+  });
+
+  // legend — 3 rows × up to 3 items, short labels
+  const seen=new Set(), segs=[];
+  rows.forEach(r=>r.segs.forEach(s=>{if(!seen.has(s.label)){seen.add(s.label);segs.push(s);}}));
+  // short display labels for legend
+  const short={
+    'Ожидание в бэклоге PM':       'Ожидание (бэклог PM)',
+    'Проработка PM (требования, план)': 'Проработка PM',
+    'Оценка и декомпозиция (dev-команда)': 'Оценка и декомпозиция',
+    'В разработке (Downstream)':   'В разработке (DS)',
+    'Написание кода':              'Написание кода',
+    'В очереди между этапами':     'В очереди',
+    'Очередь после разработки':    'Очередь после разработки',
+    'Ревью / тестирование':        'Ревью / тестирование',
+  };
+  // row spacing: 8 items → 3 rows of [3,3,2]
+  const rowSpacing=[182, 182, 250];
+  const chunks=[[segs[0],segs[1],segs[2]],[segs[3],segs[4],segs[5]],[segs[6],segs[7]]];
+  chunks.forEach((chunk,ri)=>{
+    if(!chunk)return;
+    const ly=H-50+ri*17;
+    const sp=rowSpacing[ri]||200;
+    chunk.filter(Boolean).forEach((s,i)=>{
+      const lx=p.l+i*sp;
+      svg.appendChild(se('rect',{x:lx,y:ly-5,width:10,height:10,fill:s.color,rx:'2'}));
+      const t=se('text',{x:lx+14,y:ly,'font-size':'9.5','fill':C.gray,'dominant-baseline':'middle'});
+      t.textContent=short[s.label]||s.label;
+      svg.appendChild(t);
+    });
+  });
+}
+
+/* ════════════════════════════════════
+   PAIRED HORIZONTAL BARS (slide 2)
+════════════════════════════════════ */
+function drawPairedBars(id,groups){
+  const svg=document.getElementById(id);
+  const W=650,H=190,p={t:16,r:104,b:28,l:128};
+  const cw=W-p.l-p.r,bH=19,bgap=5,ggap=16;
+  let y=p.t;
+
+  groups.forEach(g=>{
+    const totalH=g.pairs.length*(bH+bgap)-bgap;
+    const cy=y+totalH/2;
+    // group label
+    const lblLines=g.label.split('\n');
+    lblLines.forEach((ln,li)=>{
+      const t=se('text',{x:p.l-9,y:cy+(li-(lblLines.length-1)/2)*14,
+        'text-anchor':'end','dominant-baseline':'middle','font-size':'15',
+        'fill':C.dark,'font-weight':'700'});
+      t.textContent=ln;
+      svg.appendChild(t);
+    });
+
+    g.pairs.forEach(pr=>{
+      const bw=pr.value/g.max*cw;
+      svg.appendChild(se('rect',{x:p.l,y,width:cw,height:bH,fill:'#EEF1F5',rx:'4'}));
+      svg.appendChild(se('rect',{x:p.l,y,width:bw,height:bH,fill:pr.color,rx:'4'}));
+      const inside=bw>44;
+      const vt=se('text',{x:inside?p.l+bw-5:p.l+bw+5,y:y+bH/2,
+        'font-size':'14','font-weight':'700','fill':inside?'#fff':pr.color,
+        'text-anchor':inside?'end':'start','dominant-baseline':'middle'});
+      vt.textContent=pr.value+'%';
+      svg.appendChild(vt);
+      const lt=se('text',{x:p.l+cw+7,y:y+bH/2,'dominant-baseline':'middle',
+        'font-size':'14','fill':C.gray});
+      lt.textContent=pr.label;
+      svg.appendChild(lt);
+      y+=bH+bgap;
+    });
+    y+=ggap;
+  });
+
+  // Mobile separate marker — bar slightly higher so two-line label fits inside viewBox
+  const mobileBarW=DATA.lines.bugShareClosed.mobile/100*cw;
+  const mobileY=H-42;
+  svg.appendChild(se('rect',{x:p.l,y:mobileY-7,
+    width:mobileBarW,height:14,fill:C.red,rx:'4',opacity:'.25'}));
+  // percentage value right of bar
+  const mt=se('text',{x:p.l+mobileBarW+6,y:mobileY,
+    'font-size':'14','font-weight':'700','fill':C.red,'dominant-baseline':'middle'});
+  mt.textContent=DATA.lines.bugShareClosed.mobile+'% багов';
+  svg.appendChild(mt);
+  // two-line description below the bar (left-aligned, fits within viewBox)
+  const ml1=se('text',{x:p.l,y:mobileY+10,
+    'font-size':'13','font-weight':'700','fill':C.red,'dominant-baseline':'hanging'});
+  ml1.textContent='Mobile (теги mobile/app): '+DATA.lines.bugShareClosed.mobile+'% багов среди закрытых';
+  svg.appendChild(ml1);
+  const ml2=se('text',{x:p.l,y:mobileY+23,
+    'font-size':'13','fill':C.red,'dominant-baseline':'hanging'});
+  ml2.textContent='229 карточек · 4 дорожки';
+  svg.appendChild(ml2);
+}
+
+/* ════════════════════════════════════
+   MINI BAR — 1С created/closed
+════════════════════════════════════ */
+function drawMiniBar(id,created,closed){
+  const svg=document.getElementById(id);
+  const W=110,H=80,bW=26,maxV=Math.max(created,closed)*1.25;
+  const yS=v=>H-18-(v/maxV)*(H-28);
+  [[created,C.red,16,'Созд.'],[closed,C.teal,62,'Закр.']].forEach(([v,col,x,lbl])=>{
+    const y=yS(v),bh=H-18-y;
+    svg.appendChild(se('rect',{x,y,width:bW,height:bh,fill:col,rx:'3'}));
+    const vt=se('text',{x:x+bW/2,y:y-4,'font-size':'15','font-weight':'800','fill':col,
+      'text-anchor':'middle','dominant-baseline':'auto'});
+    vt.textContent=v;
+    svg.appendChild(vt);
+    const lt=se('text',{x:x+bW/2,y:H-4,'font-size':'13','fill':col,
+      'text-anchor':'middle','dominant-baseline':'auto'});
+    lt.textContent=lbl;
+    svg.appendChild(lt);
+  });
+}
+
+/* ════════════════════════════════════
+   GAUGE — semicircle
+   Arc goes: left(180°) clockwise through top to right(0°)
+   sweep=1, large-arc=0 (≤180°), la=1 only at exactly 100%
+════════════════════════════════════ */
+function drawGauge(id,value,maxVal,color,showOverflow){
+  const svg=document.getElementById(id);
+  const cx=100,cy=100,R=68;
+  const bx1=cx-R, bx2=cx+R;
+  // background arc
+  svg.appendChild(se('path',{
+    d:`M ${bx1} ${cy} A ${R} ${R} 0 0 1 ${bx2} ${cy}`,
+    fill:'none',stroke:'#DDE3EB','stroke-width':'12','stroke-linecap':'round'}));
+  // value arc
+  const pct=Math.min(value/maxVal,1);
+  if(pct>0.01){
+    const ang=(180+pct*180)*Math.PI/180;
+    const ex=(cx+R*Math.cos(ang)).toFixed(2);
+    const ey=(cy+R*Math.sin(ang)).toFixed(2);
+    const la=pct>=0.999?1:0;
+    svg.appendChild(se('path',{
+      d:`M ${bx1} ${cy} A ${R} ${R} 0 ${la} 1 ${ex} ${ey}`,
+      fill:'none',stroke:color,'stroke-width':'12','stroke-linecap':'round'}));
+  }
+  // overflow marker
+  if(showOverflow&&value>maxVal*0.95){
+    const ov=se('text',{x:cx,y:cy+22,'text-anchor':'middle','font-size':'13','font-weight':'700','fill':C.red,'dominant-baseline':'hanging'});
+    ov.textContent='ПЕРЕГРУЗКА';
+    svg.appendChild(ov);
+  }
+  // value label
+  const vt=se('text',{x:cx,y:cy-4,'text-anchor':'middle','dominant-baseline':'middle',
+    'font-size':'20','font-weight':'800','fill':color});
+  vt.textContent=maxVal<=10?value+' сп.':value+'%';
+  svg.appendChild(vt);
+  // min/max
+  const ml=se('text',{x:bx1+3,y:cy+16,'font-size':'13','fill':C.gray,'dominant-baseline':'hanging'});
+  ml.textContent='0';
+  svg.appendChild(ml);
+  const mr=se('text',{x:bx2-3,y:cy+16,'font-size':'13','fill':C.gray,
+    'text-anchor':'end','dominant-baseline':'hanging'});
+  mr.textContent=maxVal+(maxVal<=10?' сп':'%');
+  svg.appendChild(mr);
+}
+
+/* ════════════════════════════════════
+   INIT
+════════════════════════════════════ */
+function init(){
+  // subtitles
+  document.getElementById('s1sub').textContent=
+    'Единый процесс по двум доскам Kaiten · данные на '+DATA.asOf;
+  document.getElementById('s2sub').textContent=
+    'Где теряется время и мощность · данные на '+DATA.asOf;
+
+  // KPI row
+  const ratio=(DATA.kpi.inflowLast3/DATA.kpi.inflowFirst4).toFixed(1);
+  [
+    {v:DATA.kpi.valueBoardOpen, b:'+'+DATA.kpi.valueBoardChangePct+'%',
+     bc:'kbu', l:'открыто на доске ценностей (с 28.05)', cls:'kr'},
+    {v:DATA.kpi.downstreamOpen, b:DATA.kpi.downstreamChangePct+'%',
+     bc:'kbd', l:'открыто на Downstream 2.0 (с 28.05)', cls:''},
+    {v:'×'+ratio, b:DATA.kpi.inflowFirst4+'→'+DATA.kpi.inflowLast3+'/спр',
+     bc:'kbu', l:'рост притока идей (первые 4 vs последние 3 спринта)', cls:'kr'},
+    {v:DATA.kpi.waitingForStart,
+     b:DATA.kpi.olderThan90+' из '+DATA.kpi.openTotalValue+' старше 90 дн.',
+     bc:'kbu', l:'ждут старта разработки', cls:'ka'},
+  ].forEach(k=>{
+    const d=document.createElement('div');
+    d.className='kc '+k.cls;
+    d.innerHTML='<div><span class="kv">'+k.v+'</span><span class="kb '+k.bc+'">'+k.b+'</span></div>'+
+      '<div class="kl">'+k.l+'</div>';
+    document.getElementById('krow').appendChild(d);
+  });
+
+  // Line chart
+  drawLineChart('lcSvg',DATA.queueDates,[
+    {label:'Доска ценностей',d:DATA.openValueBoard,color:C.red},
+    {label:'Downstream 2.0', d:DATA.openDownstream, color:C.teal}
+  ]);
+
+  // Grouped bars
+  drawGroupedBars('gbSvg',DATA.sprints,[
+    {label:'Создано',d:DATA.valueCreated,color:C.red},
+    {label:'Закрыто',d:DATA.valueClosed, color:C.gray}
+  ]);
+
+  // Stacked bars
+  const tv=DATA.timeValue, td=DATA.timeDownstream;
+  drawStackedBars('sbSvg',[
+    {
+      label:'Ценности\n(46,7 дн.)', owner:'PM', total:tv.total, segs:[
+        {label:'Ожидание в бэклоге PM',
+         value:tv.waitBeforeDev, color:C.red},
+        {label:'Проработка PM (требования, план)',
+         value:tv.active, color:C.teal,
+         active:true, activeLabel:'Работа PM', activeColor:C.teal},
+        {label:'Оценка и декомпозиция (dev-команда)',
+         value:tv.other, color:'#5B7FA6'},
+        {label:'В разработке (Downstream)',
+         value:tv.inDev, color:'#7B9EBC'}
+      ]
+    },
+    {
+      label:'Downstream\n(22,9 дн.)', owner:'DEV', total:td.total, segs:[
+        {label:'Написание кода',
+         value:td.active, color:'#1A7A6A',
+         active:true, activeLabel:'Код', activeColor:'#1A7A6A'},
+        {label:'В очереди между этапами',
+         value:td.queue, color:'#B0BEC5'},
+        {label:'Очередь после разработки',
+         value:td.tailAfterDev, color:C.amber, tail:true},
+        {label:'Ревью / тестирование',
+         value:td.other, color:'#8B6BAE'}
+      ]
+    }
+  ]);
+
+  // Footer
+  const src='Источники: '+DATA.sources;
+  document.getElementById('f1').textContent=src;
+  document.getElementById('f2').textContent=src;
+
+  // Slide 2 metric card
+  document.getElementById('mc1cs').textContent=DATA.lines.openShare1C+'%';
+  document.getElementById('mc1cper').textContent=
+    DATA.lines.lastSprintStart+' – '+DATA.lines.lastSprintEnd;
+  document.getElementById('mc1cc').textContent=DATA.lines.created1CLastPeriod;
+  document.getElementById('mc1ccl').textContent=DATA.lines.closed1CPerSprint;
+  const r1c=(DATA.lines.created1CLastPeriod/DATA.lines.closed1CPerSprint).toFixed(1);
+  document.getElementById('mc1cb').innerHTML=
+    'Создано / закрыто<br>= <strong>'+r1c+'</strong><br>очередь растёт';
+
+  // Mini bar
+  drawMiniBar('mbSvg',DATA.lines.created1CLastPeriod,DATA.lines.closed1CPerSprint);
+
+  // Paired bars
+  drawPairedBars('pbSvg',[
+    {label:'Закрыто\nза 19 дней', max:100, pairs:[
+      {label:'Web',value:DATA.lines.closedWithin19d.web,color:C.teal},
+      {label:'1С', value:DATA.lines.closedWithin19d.c1, color:C.red}
+    ]},
+    {label:'Баги среди\nзакрытых', max:100, pairs:[
+      {label:'Web',value:DATA.lines.bugShareClosed.web, color:C.amber},
+      {label:'1С', value:DATA.lines.bugShareClosed.c1,  color:C.teal}
+    ]}
+  ]);
+
+  // Gauges
+  drawGauge('g1Svg',DATA.capacity.webLoadPct,110,C.red,true);
+  document.getElementById('gWv').textContent=DATA.capacity.webLoadPct+'% ёмкости';
+  document.getElementById('gWs').textContent=
+    DATA.capacity.webClosedHours+' из '+DATA.capacity.webNominalHours+' ч.';
+  document.getElementById('gWdet').innerHTML=
+    '<div class="gcdet-formula">'+
+      DATA.capacity.webClosedHours+' ч. закрытых &divide; '+DATA.capacity.webNominalHours+' ч. норма = '+DATA.capacity.webLoadPct+'%'+
+    '</div>'+
+    '<div class="gcdet-row"><b>Состав команды:</b></div>'+
+    '<div class="gcdet-row" style="padding-left:8px;border-left:2px solid #EEF1F5;margin:2px 0 4px">'+
+      'Node.js &nbsp;<b>4</b> чел. &times; 80 ч. = 320 ч.<br>'+
+      'React &nbsp;&nbsp;&nbsp;<b>3</b> чел. &times; 80 ч. = 240 ч.<br>'+
+      'Flutter &nbsp;&nbsp;<b>1</b> чел. &times; 80 ч. = &nbsp;80 ч.<br>'+
+      '<b>Итого &nbsp;&nbsp;&nbsp;8 чел. &times; 80 ч. = 640 ч./спринт</b>'+
+    '</div>'+
+    '<div class="gcdet-row"><b>Факт:</b> сумма Workload(h) закрытых карточек Web-дорожки за последний спринт</div>'+
+    '<div class="gcdet-row"><b>Дуга:</b> 100% = номинал; красная = превышение (перегруз)</div>'+
+    '<div class="gcdet-src">Источник: Downstream 2.0, дорожка Web (690 карт.)<br>Спринт 01.10–19.10.2026 · поле Workload(h)</div>';
+
+  drawGauge('g2Svg',DATA.capacity.c1QueueSprintsBySP,1,C.red,true);
+  document.getElementById('g1Cv').textContent=DATA.capacity.c1QueueSprintsBySP+' сп. (норма = 1 спринт)';
+  document.getElementById('g1Cdet').innerHTML=
+    '<div class="gcdet-formula">'+
+      'Открытые SP (1С) &divide; Velocity SP = '+DATA.capacity.c1QueueSprintsBySP+' сп.'+
+    '</div>'+
+    '<div class="gcdet-row"><b>Открытая очередь:</b> 57 активных карточек линии 1С с SP-оценкой</div>'+
+    '<div class="gcdet-row"><b>Velocity 1С:</b> ср. SP закрытых за последние 3 спринта</div>'+
+    '<div class="gcdet-row"><b>Норма:</b> очередь &le; 1 спринта (2 нед.); превышение = риск задержки</div>'+
+    '<div class="gcdet-src">Источник: Downstream 2.0, дорожка 1С (312 карт.)<br>'+
+    'Спринт '+DATA.lines.lastSprintStart+' – '+DATA.lines.lastSprintEnd+' · SP-оценки · поле Size unit = "sp"</div>';
+
+  // Caveats
+  document.getElementById('cav').innerHTML=
+    '<strong>Ограничения данных:</strong> '+
+    DATA.caveats.map((c,i)=>(i+1)+'. '+c).join(' ');
+
+  // Scale + show slide 1
+  rescale();
+  requestAnimationFrame(()=>document.getElementById('s1').classList.add('vis'));
+}
+
+/* ════════════════════════════════════
+   SCALE
+════════════════════════════════════ */
+function rescale(){
+  const sc=document.getElementById('scaler');
+  const s=Math.min(window.innerWidth/1920,window.innerHeight/1080);
+  const ox=(window.innerWidth-1920*s)/2;
+  const oy=(window.innerHeight-1080*s)/2;
+  sc.style.transform='scale('+s+')';
+  sc.style.left=ox+'px';
+  sc.style.top=oy+'px';
+}
+
+/* ════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════ */
+let cur=0;
+const slides=document.querySelectorAll('.slide');
+const dots=document.querySelectorAll('.nd');
+const nc=document.getElementById('nc');
+
+function goTo(n){
+  n=Math.max(0,Math.min(slides.length-1,n));
+  if(n===cur)return;
+  slides[cur].classList.remove('vis');
+  setTimeout(()=>{
+    slides[cur].classList.remove('active');
+    dots[cur].classList.remove('active');
+    cur=n;
+    slides[cur].classList.add('active');
+    dots[cur].classList.add('active');
+    nc.textContent=(cur+1)+'/'+slides.length;
+    requestAnimationFrame(()=>slides[cur].classList.add('vis'));
+  },120);
+}
+
+document.getElementById('pb').onclick=()=>goTo(cur-1);
+document.getElementById('nb').onclick=()=>goTo(cur+1);
+dots.forEach(d=>d.addEventListener('click',()=>goTo(+d.dataset.n)));
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')goTo(cur+1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')goTo(cur-1);
+});
+window.addEventListener('resize',rescale);
+
+// Start
+document.getElementById('s1').classList.add('active');
+dots[0].classList.add('active');
+init();
+</script>
+</body>
+</html>

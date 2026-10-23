@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Карта потока создания ценности — PMO × Разработка</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1923;display:flex;align-items:center;justify-content:center;
+  height:100vh;overflow:hidden;font-family:'Inter','Segoe UI',Arial,sans-serif}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#scaler{position:absolute;width:1920px;height:1080px;transform-origin:top left}
+
+.slide{width:1920px;height:1080px;background:#F5F7FA;position:absolute;inset:0;
+  display:none;flex-direction:column;padding:22px 36px 12px;color:#142B4D;
+  opacity:0;transition:opacity .3s ease}
+.slide.active{display:flex}
+.slide.vis{opacity:1}
+
+.sh{margin-bottom:8px;flex-shrink:0}
+.sh h1{font-size:24px;font-weight:800;color:#142B4D;line-height:1.2;letter-spacing:-.3px}
+.sh h2{font-size:13.5px;color:#555B66;margin-top:3px;font-weight:400}
+
+.krow{display:flex;gap:10px;margin-bottom:10px;flex-shrink:0}
+.kc{flex:1;background:#fff;border-radius:12px;padding:8px 12px;
+  box-shadow:0 2px 8px rgba(20,43,77,.08);border-top:3px solid #1F8A8A}
+.kc.kr{border-top-color:#C0392B}
+.kc.ka{border-top-color:#E08E0B}
+.kv{font-size:22px;font-weight:800;color:#142B4D;line-height:1;display:inline}
+.kb{font-size:12px;font-weight:700;margin-left:6px}
+.kbu{color:#C0392B}.kbd{color:#1F8A8A}
+.kl{font-size:11px;color:#555B66;margin-top:2px;line-height:1.3}
+
+.sf{font-size:10px;color:#9aa;margin-top:6px;border-top:1px solid #E0E4EA;
+  padding-top:5px;flex-shrink:0;line-height:1.35}
+
+/* VSM stacked flow */
+.vsm{flex:0 0 auto;display:flex;flex-direction:column}
+.map{background:#fff;border-radius:14px;padding:14px 18px 12px;
+  box-shadow:0 2px 10px rgba(20,43,77,.08)}
+.read{font-size:12.5px;color:#555B66;line-height:1.45;margin-bottom:10px}
+.read b{color:#142B4D}
+.axis{display:flex;margin:0 0 4px 168px;margin-right:90px;font-size:11px;color:#888}
+.axis span{flex:1;text-align:center}
+.axis span:first-child{text-align:left}
+.axis span:last-child{text-align:right}
+.flow-row{display:flex;align-items:stretch;margin-bottom:10px}
+.flow-lab{width:160px;flex-shrink:0;padding-right:8px;display:flex;flex-direction:column;justify-content:center}
+.flow-lab .t{font-size:13px;font-weight:800;color:#142B4D;line-height:1.2}
+.flow-lab .s{font-size:11px;font-weight:700;margin-top:2px}
+.flow-lab .s.pmo{color:#1F8A8A}
+.flow-lab .s.dev{color:#5B7FA6}
+.flow-track{flex:1;min-width:0}
+.flow-bar{display:flex;height:56px;border-radius:6px;overflow:hidden}
+.seg{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#fff;text-align:center;padding:4px 6px;min-width:0}
+.seg .n{font-size:16px;font-weight:800;line-height:1.1}
+.seg .l{font-size:11px;font-weight:600;opacity:.95;line-height:1.2;margin-top:2px}
+.flow-tot{width:82px;flex-shrink:0;display:flex;align-items:center;padding-left:8px;
+  font-size:14px;font-weight:800;color:#142B4D}
+.leg{display:flex;flex-wrap:wrap;gap:8px 16px;margin:6px 0 0 160px}
+.leg i{display:inline-flex;align-items:center;gap:6px;font-style:normal;font-size:12px;color:#555B66}
+.leg i::before{content:'';width:10px;height:10px;border-radius:2px;background:var(--c);flex-shrink:0}
+
+.order{flex:1;min-height:0;margin-top:12px;background:#fff;border-radius:14px;
+  padding:12px 16px 14px;box-shadow:0 2px 10px rgba(20,43,77,.08);
+  display:flex;flex-direction:column;border-top:4px solid #1F8A8A}
+.order>h3{font-size:16px;font-weight:800;margin-bottom:8px;color:#142B4D}
+.order ol{margin:0;padding:0;list-style:none;flex:1;min-height:0;
+  display:flex;flex-direction:column}
+.order li{display:flex;gap:12px;align-items:flex-start;flex:1;
+  padding:6px 0;border-top:1px solid #E8ECF2}
+.order li:first-child{border-top:0;padding-top:0}
+.order .n{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#1F8A8A;
+  color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;
+  justify-content:center;margin-top:1px}
+.order .head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:2px}
+.order .head b{font-size:13.5px}
+.order li p{font-size:12.5px;line-height:1.4;color:#142B4D}
+.order .goal{color:#1F8A8A;margin-top:2px}
+.who{font-size:11px;font-weight:700;line-height:1.2;padding:2px 7px;border-radius:999px}
+.who.pmo{color:#1F8A8A;background:#E8F6F5}
+.who.dev{color:#142B4D;background:#EEF2F7}
+.who.both{color:#8A5A10;background:#FFF6E8}
+
+/* Slide 2 */
+.s2b{flex:1;display:flex;gap:12px;min-height:0}
+.s2L{flex:1.15;display:flex;flex-direction:column;gap:9px;min-height:0}
+.s2R{flex:.85;display:flex;flex-direction:column;gap:9px;min-height:0}
+.card{background:#fff;border-radius:12px;padding:10px 14px;
+  box-shadow:0 2px 8px rgba(20,43,77,.08);flex:1;min-height:0}
+.card h3{font-size:13.5px;font-weight:800;margin-bottom:7px}
+.hint{font-size:11px;color:#555B66;margin-bottom:7px;font-style:italic}
+
+.loop{display:flex;gap:8px;align-items:stretch}
+.loop-item{flex:1;border-radius:9px;padding:8px 10px;background:#F7F9FB;
+  border-left:3px solid #5B7FA6}
+.loop-item.pull{border-left-color:#1F8A8A}
+.loop-item.push{border-left-color:#C0392B}
+.loop-item b{display:block;font-size:12px;margin-bottom:2px}
+.loop-item p{font-size:10.5px;color:#555B66;line-height:1.4}
+
+.kz{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.kz i{font-style:normal;display:block;border-radius:9px;padding:7px 10px;
+  background:#FAFBFC;border-left:3px solid #C0392B}
+.kz i.p2{border-left-color:#E08E0B}
+.kz i.p3{border-left-color:#1F8A8A}
+.kz b{font-size:12px;display:block}
+.kz span{font-size:10.5px;color:#555B66;line-height:1.35}
+
+.fs{display:flex;gap:8px}
+.fs-col{flex:1;background:#F4FBF8;border:1px solid #CDE8DC;border-radius:9px;padding:8px 10px}
+.fs-col.now{background:#FFF6F6;border-color:#F0D0CC}
+.fs-col h4{font-size:12px;font-weight:800;margin-bottom:4px}
+.fs-col ul{margin:0;padding-left:14px;font-size:11px;line-height:1.45;color:#3A4D60}
+
+table.mini{width:100%;border-collapse:collapse;font-size:11px}
+table.mini th{text-align:left;font-size:10px;color:#555B66;padding:3px 6px;
+  border-bottom:1px solid #E8ECF2}
+table.mini td{padding:4px 6px;border-bottom:1px solid #F0F2F5;vertical-align:top;line-height:1.35}
+table.mini td:first-child{font-weight:700;white-space:nowrap}
+
+#s2 .sh h1{font-size:28px}
+#s2 .sh h2{font-size:16px}
+.rice{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.rice-types{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;flex-shrink:0}
+.rice-type{background:#fff;border-radius:12px;padding:12px 16px;
+  box-shadow:0 2px 8px rgba(20,43,77,.08);border-top:4px solid #1F8A8A}
+.rice-type.bug{border-top-color:#E08E0B}
+.rice-type.exp{border-top-color:#C0392B}
+.rice-type h3{font-size:18px;font-weight:800;margin-bottom:5px}
+.rice-type p{font-size:16px;line-height:1.4;color:#142B4D}
+.rice-type .sub{font-size:14px;color:#555B66;margin-top:4px}
+.rice-formula{background:#fff;border-radius:12px;padding:12px 16px;
+  box-shadow:0 2px 8px rgba(20,43,77,.08);flex-shrink:0;
+  display:flex;align-items:center;justify-content:flex-start;gap:14px}
+.rice-formula .eq{font-size:22px;font-weight:800;color:#142B4D;flex-shrink:0}
+.rice-formula .eq b{color:#1F8A8A}
+.rice-formula .note{font-size:16px;color:#555B66;line-height:1.4}
+.rice-split{flex:0 0 auto;display:grid;grid-template-columns:1.25fr .75fr;gap:10px}
+.rice .card{flex:none;min-height:0;display:flex;flex-direction:column}
+.rice .card h3{flex-shrink:0;font-size:17px;margin-bottom:8px}
+.rice-mx{flex:1;min-height:0}
+.rice-mx table.mini{font-size:16px}
+.rice-mx table.mini th{font-size:13px}
+.rice-mx table.mini th,.rice-mx table.mini td{padding:9px 12px}
+.rice-mx table.mini td:first-child{white-space:nowrap}
+.rice-mx .hi{background:#E8F6F5;font-weight:700;color:#142B4D}
+.rice-mx .mid{background:#F7F9FB}
+.rice-mx .lo{color:#555B66}
+.rice-tie ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.rice-tie li{display:flex;gap:10px;align-items:flex-start}
+.rice-tie .n{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#1F8A8A;
+  color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;
+  justify-content:center;margin-top:1px}
+.rice-tie p{font-size:16px;line-height:1.4;color:#142B4D}
+.rice-mid{flex:0 0 auto}
+.rice-mid table.mini{font-size:15px}
+.rice-mid table.mini th{font-size:13px}
+.rice-mid table.mini th,.rice-mid table.mini td{padding:7px 10px}
+
+#nav{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:9px;z-index:999;
+  background:rgba(15,25,35,.6);backdrop-filter:blur(8px);
+  border-radius:28px;padding:7px 15px;border:1px solid rgba(255,255,255,.12)}
+.nd{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer}
+.nd.active{background:#fff}
+.nb{background:none;border:none;color:rgba(255,255,255,.8);font-size:18px;
+  cursor:pointer;padding:2px 7px;line-height:1}
+.nc{color:#fff;font-size:12px;font-weight:700;min-width:22px;text-align:center}
+
+@media print{
+  body,#stage{background:#fff!important}
+  #nav{display:none!important}
+  #stage{position:static!important;width:297mm!important;height:210mm!important}
+  #scaler{position:static!important;transform:none!important;width:297mm!important;height:210mm!important}
+  .slide{position:static!important;display:flex!important;width:297mm!important;height:210mm!important;
+    opacity:1!important;page-break-after:always;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div id="stage">
+<div id="scaler">
+
+  <!-- ═══════ SLIDE 1: Current-state VSM ═══════ -->
+  <section class="slide" id="s1" aria-label="Слайд 1: карта текущего состояния">
+    <div class="sh">
+      <h1>Карта потока создания ценности — текущее состояние</h1>
+      <h2>Сквозной путь «идея → продукт у клиента» через PMO и команду разработки · данные Kaiten на 16.10.2026</h2>
+    </div>
+    <div class="vsm">
+      <div class="map">
+        <div class="read">
+          <b>PMO (доска ценностей):</b> ожидание в бэклоге — карточка создана, ждёт PM.
+          Проработка PM — требования и план.
+          Оценка и декомпозиция — граница передачи в Downstream.
+          &nbsp;·&nbsp;
+          <b>DEV (Downstream):</b> написание кода — активная работа.
+          В очереди — ожидание между этапами.
+          Очередь после разработки — review → тест → деплой → приёмка.
+          Ревью / тестирование — активный QA.
+        </div>
+        <div class="axis"><span>0</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50 дней</span></div>
+
+        <div class="flow-row">
+          <div class="flow-lab">
+            <span class="t">Ценности (46,7 дн.)</span>
+            <span class="s pmo">↳ PMO</span>
+          </div>
+          <div class="flow-track">
+          <div class="flow-bar" style="width:93.4%">
+            <div class="seg" style="flex:4.8;background:#C0392B"><div class="n">4,8</div><div class="l">ожидание</div></div>
+            <div class="seg" style="flex:10.4;background:#1F8A8A"><div class="n">10,4</div><div class="l">проработка PM</div></div>
+            <div class="seg" style="flex:5.9;background:#5B7FA6"><div class="n">5,9</div><div class="l">оценка</div></div>
+            <div class="seg" style="flex:25.6;background:#7B9EBC"><div class="n">25,6</div><div class="l">в разработке (DS)</div></div>
+          </div>
+          </div>
+          <div class="flow-tot">46,7 дн.</div>
+        </div>
+
+        <div class="flow-row">
+          <div class="flow-lab">
+            <span class="t">Downstream (22,9 дн.)</span>
+            <span class="s dev">↳ DEV</span>
+          </div>
+          <div class="flow-track">
+          <div class="flow-bar" style="width:45.8%">
+            <div class="seg" style="flex:3.8;background:#1A7A6A"><div class="n">3,8</div><div class="l">код</div></div>
+            <div class="seg" style="flex:5.8;background:#B0BEC5;color:#142B4D"><div class="n">5,8</div><div class="l">в очереди</div></div>
+            <div class="seg" style="flex:9.7;background:#E08E0B"><div class="n">9,7</div><div class="l">после разработки</div></div>
+            <div class="seg" style="flex:3.6;background:#8B6BAE"><div class="n">3,6</div><div class="l">ревью / тест</div></div>
+          </div>
+          </div>
+          <div class="flow-tot">22,9 дн.</div>
+        </div>
+        <div class="leg">
+          <i style="--c:#C0392B">Ожидание (бэклог PMO)</i>
+          <i style="--c:#1F8A8A">Проработка PM</i>
+          <i style="--c:#5B7FA6">Оценка и декомпозиция</i>
+          <i style="--c:#7B9EBC">В разработке (на доске ценностей)</i>
+          <i style="--c:#1A7A6A">Написание кода</i>
+          <i style="--c:#B0BEC5">В очереди</i>
+          <i style="--c:#E08E0B">Очередь после разработки</i>
+          <i style="--c:#8B6BAE">Ревью / тестирование</i>
+        </div>
+      </div>
+    </div>
+    <div class="order" aria-label="Дальнейшие действия">
+      <h3>Дальнейшие действия</h3>
+      <ol>
+        <li>
+          <span class="n" aria-hidden="true">1</span>
+          <div>
+            <div class="head"><b>Приоритезация</b><span class="who pmo">PMO</span></div>
+            <p>Разобрать 114 карточек в «Приоритезация / Готово» и 121 карточку старше 90 дней: взять в работу, отложить с датой или закрыть.</p>
+            <p class="goal">В этой колонке одновременно не больше 20 карточек. За 2 недели старых (лежат 90+ дней) останется не больше 60.</p>
+          </div>
+        </li>
+        <li>
+          <span class="n" aria-hidden="true">2</span>
+          <div>
+            <div class="head"><b>Ёмкость 1С</b><span class="who both">PMO + Dev</span></div>
+            <p>Не отдавать в разработку больше, чем команда успеет за спринт. Пока очередь длиннее спринта — новые карточки не добавлять.</p>
+            <p class="goal">1С: 384 ч на продукт и 96 ч на баги. Очередь — не длиннее одного спринта (сейчас два).</p>
+          </div>
+        </li>
+        <li>
+          <span class="n" aria-hidden="true">3</span>
+          <div>
+            <div class="head"><b>Разные правила для задач</b><span class="who pmo">PMO</span></div>
+            <p>Продукт, баг и срочное идут по разным правилам. Срочный баг не выкидывает продуктовую задачу без явного решения PMO.</p>
+            <p class="goal">Среди закрытых задач баги — не больше четверти.</p>
+          </div>
+        </li>
+        <li>
+          <span class="n" aria-hidden="true">4</span>
+          <div>
+            <div class="head"><b>Оценка: 1 SP = 4 часа</b><span class="who dev">1С</span></div>
+            <p>Принимаем в работу по аналитике Kaiten: 1 story point = 4 часа (полдня одного разработчика). Спринт человека — 80 ч = 20 SP, шестеро 1С — 120 SP на спринт. Проставить оценку на 28 карточек 1С без размера.</p>
+            <p class="goal">У каждой активной карточки 1С есть оценка. В «Готово» — дата закрытия, иначе очередь снова считают на глаз.</p>
+          </div>
+        </li>
+        <li>
+          <span class="n" aria-hidden="true">5</span>
+          <div>
+            <div class="head"><b>Буфер спринта 80 / 20</b><span class="who both">Оба</span></div>
+            <p>80% спринта — запланированная ценность. 20% заранее оставляем на баги, срочное и замечания. Эту квоту нельзя заранее забить фичами.</p>
+            <p class="goal">1С: 384 ч продукт + 96 ч буфер. Web: 512 ч продукт + 128 ч буфер.</p>
+          </div>
+        </li>
+        <li>
+          <span class="n" aria-hidden="true">6</span>
+          <div>
+            <div class="head"><b>Обратная связь</b><span class="who both">PMO + Dev</span></div>
+            <p>После кода и на доске ценностей ответ заказчику — не дольше 3 дней. «Берём / не берём», замечание с приёмки и баг сразу возвращаются в портфель PMO, а не копятся до релиза.</p>
+            <p class="goal">Карточка не висит неделями в «почти готово».</p>
+          </div>
+        </li>
+        <li>
+          <span class="n" aria-hidden="true">7</span>
+          <div>
+            <div class="head"><b>Руководитель разработки и единый отчёт</b><span class="who both">PMO + Dev</span></div>
+            <p>Добавить руководителя команды разработки. Операционные KPI — очередь, ёмкость, доля багов, срок обратной связи — вывести на одну информационную панель / отчёт, чтобы PMO и Dev смотрели одни цифры.</p>
+            <p class="goal">Один отчёт на спринт вместо разрозненных выгрузок из Kaiten.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ═══════ SLIDE 2: RICE prioritization ═══════ -->
+  <section class="slide" id="s2" aria-label="Слайд 2: приоритезация по матрице">
+    <div class="sh">
+      <h1>Как проектный отдел считает приоритет</h1>
+    </div>
+    <div class="rice">
+      <div class="rice-types">
+        <div class="rice-type">
+          <h3>Продукт</h3>
+          <p>Новая ценность. PMO ставит ценность, разработка — размер. Смотрим клетку матрицы и отдаём сверху вниз, не больше ёмкости спринта.</p>
+        </div>
+        <div class="rice-type bug">
+          <h3>Баг</h3>
+          <p>Живёт в буфере 20% спринта. Считаем по критичности, в матрицу не кладём.</p>
+        </div>
+        <div class="rice-type exp">
+          <h3>Срочное</h3>
+          <p>Только явным решением PMO. Съедает буфер, не продуктовую очередь. Не ломаем работу в коде.</p>
+        </div>
+      </div>
+
+      <div class="rice-formula">
+        <div class="eq">Клетка = приоритет</div>
+        <p class="note">Ценность: слабый / средний / сильный. Размер: S до 2 SP · M 3–5 SP · L 8 SP и больше. Нет постановки — в матрицу не кладём.</p>
+      </div>
+
+      <div class="rice-split">
+        <div class="card rice-mx">
+          <h3>Матрица продукта</h3>
+          <table class="mini">
+            <tr><th></th><th>S · до 2 SP</th><th>M · 3–5 SP</th><th>L · 8 SP и больше</th></tr>
+            <tr><td>Сильный</td><td class="hi">Брать первыми</td><td class="hi">Во вторую очередь</td><td class="mid">Делить или откладывать</td></tr>
+            <tr><td>Средний</td><td class="hi">Во вторую очередь</td><td class="mid">Очередь продукта</td><td class="lo">Только если есть ёмкость</td></tr>
+            <tr><td>Слабый</td><td class="mid">Мелочь в хвост спринта</td><td class="lo">Не отдавать, пока очередь &gt; 1 спринта</td><td class="lo">Не брать</td></tr>
+          </table>
+        </div>
+        <div class="card rice-tie">
+          <h3>Если размер одинаковый</h3>
+          <ol>
+            <li>
+              <span class="n" aria-hidden="true">1</span>
+              <p>Есть SP — меньше SP выше. Две карточки M, 3 SP и 5 SP: сначала 3 SP.</p>
+            </li>
+            <li>
+              <span class="n" aria-hidden="true">2</span>
+              <p>SP нет или тоже равны — кто раньше получил готовую постановку.</p>
+            </li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="rice-mid">
+        <div class="card">
+          <h3>Что делать на этапах карты потока</h3>
+          <table class="mini">
+            <tr><th>Этап карты</th><th>Проектный отдел</th><th>От разработки</th></tr>
+            <tr><td>Ожидание · 4,8 дн.</td><td>Тип: продукт / баг / срочное. Взять, отложить датой или закрыть. В матрицу ещё не кладём.</td><td>Ничего</td></tr>
+            <tr><td>Проработка PM · 10,4 дн.</td><td>Готова постановка — да / нет. Если да, ставит ценность: слабый / средний / сильный.</td><td>Грубо: S / M / L или «влезает в спринт / нет»</td></tr>
+            <tr><td>Оценка · 5,9 дн.</td><td>Кладёт карточку в клетку. Если в клетке несколько — правило справа.</td><td>Точный SP и что вытеснится, если взять эту</td></tr>
+            <tr><td>Downstream и приёмка</td><td>Карточки в коде не переставляет. Новая сильная S вытесняет нижнюю из готовых, не из работы.</td><td>Когда задачу закрыли — ставят дату в «Готово / Готово», иначе очередь снова считают на глаз. Если после кода пришло замечание или баг с приёмки — отвечаем заказчику за 3 дня и берём это из буфера 20%, а не как новую продуктовую задачу сверху.</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ SLIDE 3: Loops, kaizen, future ═══════ -->
+  <section class="slide" id="s3" aria-label="Слайд 3: петли, кайдзен, целевое состояние">
+    <div class="sh">
+      <h1>Где поток ломается и что менять — кайдзен PMO × разработка</h1>
+      <h2>Обратные петли, типы ценности и целевое состояние потока · те же данные на 16.10.2026</h2>
+    </div>
+    <div class="s2b">
+      <div class="s2L">
+        <div class="card" style="flex:0 0 auto">
+          <h3>Три типа ценности в одном потоке</h3>
+          <p class="hint">Сейчас все типы идут по одной доске и конкурируют за одних разработчиков — без разных правил для задач.</p>
+          <table class="mini">
+            <tr><th>Тип ценности</th><th>Что это</th><th>Как ведёт себя поток</th></tr>
+            <tr><td>Продукт</td><td>Новая ценность FIT / фича для клиента</td><td>Сквозной цикл 44 дн. (PMO 21 + Dev 23). Вытесняется багами. Доска ценностей +83% с мая.</td></tr>
+            <tr><td>Проект</td><td>Связный пакет работ (несколько карточек, один результат)</td><td>Нет отдельного контура. Родительские ID есть, но PMO не видит «проект закрыт / нет».</td></tr>
+            <tr><td>Развитие / поддержка</td><td>Баги, техдолг, срочные, AdHoc</td><td>Bug = 28% Downstream; Web 35% закрытых — баги; Mobile 52%. Прерывает поток продукта.</td></tr>
+          </table>
+        </div>
+
+        <div class="card" style="flex:0 0 auto">
+          <h3>Петли взаимодействия PMO и разработки</h3>
+          <div class="loop">
+            <div class="loop-item push">
+              <b>Сейчас: Push</b>
+              <p>PMO толкает задачи вниз. Вход 72 карт/спр при закрытии 44. 160 «готовы к разработке», 121 старше 90 дней. Разработка не «тянет» работу — она получает запас.</p>
+            </div>
+            <div class="loop-item">
+              <b>Слабая петля обратной связи</b>
+              <p>После релиза есть статус Receive feedback, но он не возвращает сигнал в приоритет PMO. Баги открываются сразу в Downstream и обходят портфель.</p>
+            </div>
+            <div class="loop-item pull">
+              <b>Цель: Pull</b>
+              <p>Разработка берёт следующую ценность, только когда есть свободная ёмкость. PMO держит очередь ≤ 1 спринта и решает «войти вместо замены».</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Ёмкость vs объём бэклога — где система не сходится</h3>
+          <table class="mini">
+            <tr><th>Контур</th><th>Объём бэклога</th><th>Ёмкость / скорость</th><th>Вывод VSM</th></tr>
+            <tr><td>PMO (ценности)</td><td>339 открытых; приток 72/спр</td><td>Закрытие ≈ 44/спр</td><td>Запас на входе растёт. Узкое место — приоритезация, не кодирование.</td></tr>
+            <tr><td>Downstream</td><td>106 открытых (−48% с мая)</td><td>Закрывает 89, создаёт 76/спр</td><td>Исполнение справляется. Поток ломается до и после кода.</td></tr>
+            <tr><td>Линия 1С</td><td>~217 SP (57 карт, 28 без оценки)</td><td>Velocity ≈ 109 SP/спр; ёмкость 6 чел. = 120 SP</td><td>Очередь ≈ 2 спринта. Приток 45 vs закрытие 25 карт (01.10–19.10).</td></tr>
+            <tr><td>Web</td><td>дорожка Web, 8 чел.</td><td>664 ч / 640 ч = 104%</td><td>Ёмкость на пределе. 35% закрытых — баги, не новая ценность.</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="s2R">
+        <div class="card">
+          <h3>Точки кайдзен (что чинить в потоке)</h3>
+          <div class="kz">
+            <i><b>K1. Приоритезация</b><span>WIP-лимит ≤ 20 на «Приоритезация / Готово». Разбор 114 карточек: взять, отложить, закрыть.</span></i>
+            <i><b>K2. Вход в Dev</b><span>Правило «вход вместо замены». Карточки 90+ дней — решение за 2 недели. Цель: ≤ 60 шт.</span></i>
+            <i class="p2"><b>K3. Хвост после кода</b><span>SLA релиз + ОС ≤ 3 дней. Сейчас 9,7 дн. — главная потеря внутри разработки.</span></i>
+            <i class="p2"><b>K4. Разные правила для задач</b><span>Отдельный лимит для багов и срочных, чтобы продукт не вытеснялся. Bug ≤ 25% закрытых.</span></i>
+            <i class="p3"><b>K5. Измеримость SP</b><span>Оценить 28 карт 1С без SP. 1 SP = 4 ч. Заполнять «Готово / Готово» в DoD.</span></i>
+            <i class="p3"><b>K6. Ёмкость 1С</b><span>Не принимать > 120 SP/спринт на 1С, пока очередь > 1 спринта. Решение по кадрам — после 6 спринтов чистых SP.</span></i>
+          </div>
+        </div>
+        <div class="card" style="flex:0 0 auto">
+          <h3>Целевое состояние потока</h3>
+          <div class="fs">
+            <div class="fs-col now">
+              <h4>Сейчас</h4>
+              <ul>
+                <li>Push: PMO наполняет запас</li>
+                <li>Сквозной LT 44,0 дн. (21,1 + 22,9), PCE 54%</li>
+                <li>Один поток на все типы работ</li>
+                <li>Очередь 1С = 2 спринта</li>
+                <li>Обратная связь не управляет входом</li>
+              </ul>
+            </div>
+            <div class="fs-col">
+              <h4>Цель (1–2 квартала)</h4>
+              <ul>
+                <li>Pull: Dev берёт по ёмкости</li>
+                <li>Lead time ↓, очередь PMO ≤ 1 спр.</li>
+                <li>Продукт / баг / срочное — разные WIP</li>
+                <li>Очередь 1С ≤ 1 спринта</li>
+                <li>Баг и ОС возвращаются в портфель PMO</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sf">Метод: Value Stream Mapping (бережливое производство) — текущее состояние + кайдзен. Не путать объём бэклога (сколько работы стоит) и ёмкость (сколько команда может взять за спринт). Ограничения: SP покрыты не полностью; время 1С и Web в разных единицах; массовые закрытия искажают отдельные дни.</div>
+  </section>
+
+</div>
+</div>
+
+<nav id="nav" aria-label="Навигация">
+  <button class="nb" id="pb" aria-label="Назад">&#8592;</button>
+  <span class="nd" data-n="0"></span>
+  <span class="nd" data-n="1"></span>
+  <span class="nd" data-n="2"></span>
+  <span class="nc" id="nc">1/3</span>
+  <button class="nb" id="nb" aria-label="Вперёд">&#8594;</button>
+</nav>
+
+<script>
+function rescale(){
+  const sc=document.getElementById('scaler');
+  const s=Math.min(window.innerWidth/1920,window.innerHeight/1080);
+  sc.style.transform='scale('+s+')';
+  sc.style.left=((window.innerWidth-1920*s)/2)+'px';
+  sc.style.top=((window.innerHeight-1080*s)/2)+'px';
+}
+
+let cur=0;
+const slides=document.querySelectorAll('.slide');
+const dots=document.querySelectorAll('.nd');
+const nc=document.getElementById('nc');
+function goTo(n){
+  n=Math.max(0,Math.min(slides.length-1,n));
+  if(n===cur)return;
+  slides[cur].classList.remove('vis');
+  setTimeout(()=>{
+    slides[cur].classList.remove('active');
+    dots[cur].classList.remove('active');
+    cur=n;
+    slides[cur].classList.add('active');
+    dots[cur].classList.add('active');
+    nc.textContent=(cur+1)+'/'+slides.length;
+    requestAnimationFrame(()=>slides[cur].classList.add('vis'));
+  },120);
+}
+document.getElementById('pb').onclick=()=>goTo(cur-1);
+document.getElementById('nb').onclick=()=>goTo(cur+1);
+dots.forEach(d=>d.addEventListener('click',()=>goTo(+d.dataset.n)));
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')goTo(cur+1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')goTo(cur-1);
+});
+window.addEventListener('resize',rescale);
+
+document.getElementById('s1').classList.add('active');
+dots[0].classList.add('active');
+rescale();
+requestAnimationFrame(()=>document.getElementById('s1').classList.add('vis'));
+</script>
+</body>
+</html>

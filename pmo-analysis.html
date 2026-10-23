@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMO Analysis — Анализ досок Kaiten 16.10.2026</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#F5F7FA;font-family:'Inter','Segoe UI',Arial,sans-serif;
+  color:#142B4D;min-height:100vh;padding:32px 40px}
+.page{max-width:1200px;margin:0 auto}
+
+/* Header */
+h1{font-size:28px;font-weight:800;color:#142B4D;letter-spacing:-.4px;line-height:1.2}
+.subtitle{font-size:13px;color:#555B66;margin-top:5px}
+
+/* Section headings */
+.sec{margin:36px 0 16px;padding-left:13px;border-left:3px solid #1F8A8A}
+.sec h2{font-size:19px;font-weight:700;color:#142B4D}
+
+/* KPI grid */
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px}
+.kc{background:#fff;border-radius:12px;padding:14px 16px;
+  box-shadow:0 2px 8px rgba(20,43,77,.08);border-top:4px solid #1F8A8A}
+.kc.red{border-top-color:#C0392B}
+.kc.amber{border-top-color:#E08E0B}
+.kc.gray{border-top-color:#8899AA}
+.kv{font-size:28px;font-weight:800;color:#142B4D;line-height:1}
+.kv.red{color:#C0392B}
+.kv.amber{color:#E08E0B}
+.kl{font-size:12px;color:#555B66;margin-top:5px;line-height:1.4}
+
+/* Problem grid */
+.pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.pc{background:#fff;border-radius:10px;padding:13px 15px;
+  border-left:3px solid #DDE3EB;box-shadow:0 1px 6px rgba(20,43,77,.07)}
+.pc.critical{border-left-color:#C0392B}
+.pc.high{border-left-color:#E08E0B}
+.pc.medium{border-left-color:#1F8A8A}
+.pc.low{border-left-color:#8899AA}
+.pc-head{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.pc-title{font-size:13px;font-weight:700;flex:1}
+.badge{font-size:10px;font-weight:700;color:#fff;border-radius:4px;
+  padding:2px 7px;white-space:nowrap;flex-shrink:0}
+.badge.critical{background:#C0392B}
+.badge.high{background:#E08E0B}
+.badge.medium{background:#1F8A8A}
+.badge.low{background:#8899AA}
+.pc-desc{font-size:11.5px;color:#555B66;line-height:1.55}
+
+/* Chart cards */
+.cgrid2{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:20px}
+.cc{background:#fff;border-radius:12px;padding:16px 18px;
+  box-shadow:0 2px 8px rgba(20,43,77,.08)}
+.cc h3{font-size:13.5px;font-weight:700;color:#142B4D;margin-bottom:3px}
+.cc .hint{font-size:11px;color:#555B66;margin-bottom:10px;font-style:italic}
+.cc svg{display:block;width:100%}
+
+/* Tag bars */
+.tbar-row{margin-bottom:8px}
+.tbar-label{display:flex;justify-content:space-between;margin-bottom:3px;
+  font-size:11.5px;color:#142B4D}
+.tbar-label span{color:#555B66}
+.tbar-bg{background:#EEF1F5;border-radius:3px;height:7px}
+.tbar-fill{height:100%;border-radius:3px;background:#1F8A8A}
+
+/* Variant section */
+.vsplit{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.vbox{background:#fff;border-radius:12px;overflow:hidden;
+  box-shadow:0 2px 8px rgba(20,43,77,.08)}
+.vbox-head{padding:12px 16px;border-bottom:1px solid #EEF1F5}
+.vbox-head h3{font-size:15px;font-weight:800;color:#142B4D}
+.vbox-head .vtag{display:inline-block;font-size:11px;color:#555B66;
+  border:1px solid #DDE3EB;border-radius:5px;padding:2px 8px;margin-top:4px}
+.vdesc{font-size:12px;color:#555B66;line-height:1.6;padding:12px 16px 8px;
+  border-bottom:1px solid #EEF1F5}
+.vtable{width:100%;border-collapse:collapse;font-size:11.5px}
+.vtable th{background:#F8F9FB;font-size:10.5px;font-weight:700;color:#555B66;
+  padding:7px 10px;text-align:left;border-bottom:1px solid #EEF1F5}
+.vtable td{padding:7px 10px;border-bottom:1px solid #F0F2F5;vertical-align:top;
+  color:#142B4D;line-height:1.45}
+.vtable tr:last-child td{border-bottom:none}
+.vtable tr:hover td{background:#FAFBFC}
+.vtable td:first-child{font-weight:700;text-align:center;width:26px;color:#999}
+.vtable td:nth-child(2){width:90px;font-size:11px;color:#555B66}
+.vtable td:nth-child(5),.vtable td:nth-child(6){text-align:center;font-size:11px;font-weight:700}
+.eff-h{color:#C0392B}.eff-m{color:#1F8A8A}.eff-l{color:#8899AA}
+
+/* Callout */
+.callout{border-radius:10px;padding:13px 16px;margin-top:14px;
+  border-left:4px solid #1F8A8A}
+.callout.info{background:#EDF8F8;border-left-color:#1F8A8A}
+.callout.warn{background:#FFF8EC;border-left-color:#E08E0B}
+.callout.success{background:#EFFAF5;border-left-color:#27AE60}
+.callout b{font-size:13px;display:block;margin-bottom:4px}
+.callout p{font-size:12px;color:#3A4D60;line-height:1.55}
+
+/* Compare table */
+.ctable{width:100%;border-collapse:collapse;font-size:12px;
+  background:#fff;border-radius:12px;overflow:hidden;
+  box-shadow:0 2px 8px rgba(20,43,77,.08)}
+.ctable th{background:#F5F7FA;font-weight:700;padding:10px 14px;
+  text-align:left;color:#142B4D;border-bottom:2px solid #EEF1F5}
+.ctable th:first-child{width:180px;color:#555B66}
+.ctable td{padding:9px 14px;border-bottom:1px solid #F0F2F5;vertical-align:top;
+  color:#142B4D;line-height:1.45}
+.ctable tr:last-child td{border-bottom:none}
+.ctable tr:nth-child(even) td{background:#FAFBFC}
+.ctable td:first-child{font-weight:700;color:#555B66;font-size:11.5px}
+
+/* Footer */
+.footer{margin-top:28px;padding-top:14px;border-top:1px solid #DDE3EB;
+  font-size:11px;color:#9aa}
+
+/* Spacer */
+.gap{margin-top:24px}
+.gap2{margin-top:14px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <h1>Анализ PMO-досок</h1>
+  <p class="subtitle">Downstream 2.0 (1 132 карточки) · Доска ценностей (778 карточек) · Данные на 16.10.2026</p>
+
+  <!-- KPI -->
+  <div class="sec"><h2>Ключевые показатели</h2></div>
+  <div class="kgrid">
+    <div class="kc gray"><div class="kv">494</div><div class="kl">Активных задач<br>124 Downstream + 370 Доска ценностей</div></div>
+    <div class="kc red"><div class="kv red">71</div><div class="kl">Активных багов<br>28 Downstream + 43 Доска ценностей</div></div>
+    <div class="kc amber"><div class="kv amber">54%</div><div class="kl">Completion rate Downstream<br>612 из 1 132 задач закрыты</div></div>
+    <div class="kc red"><div class="kv red">0.6%</div><div class="kl">Карточек с тайм-трекингом<br>7 из 1 132 имеют время</div></div>
+  </div>
+  <div class="kgrid">
+    <div class="kc gray"><div class="kv">32%</div><div class="kl">Без оценки (Downstream)<br>367 карточек без размера</div></div>
+    <div class="kc red"><div class="kv red">114</div><div class="kl">Задач застряли на приоритизации<br>31% всех активных задач Доски</div></div>
+    <div class="kc amber"><div class="kv amber">208</div><div class="kl">Карточек у одного владельца<br>Намиг А. — 18% всего Downstream</div></div>
+    <div class="kc gray"><div class="kv">95%</div><div class="kl">Задач без дедлайна<br>743 из 778 на Доске ценностей</div></div>
+  </div>
+
+  <!-- Problems -->
+  <div class="sec"><h2>Ключевые проблемы</h2></div>
+  <div class="pgrid">
+    <div class="pc critical">
+      <div class="pc-head"><span class="pc-title">Нет тайм-трекинга</span><span class="badge critical">Критично</span></div>
+      <p class="pc-desc">Только 7 из 1 132 карточек Downstream имеют залогированное время (0.6%). Velocity и нагрузку посчитать невозможно.</p>
+    </div>
+    <div class="pc critical">
+      <div class="pc-head"><span class="pc-title">Горлышко на приоритезации</span><span class="badge critical">Критично</span></div>
+      <p class="pc-desc">114 активных карточек Доски ценностей застряли в «Приоритезация / Готово» — 31% всех активных задач стоят без движения.</p>
+    </div>
+    <div class="pc high">
+      <div class="pc-head"><span class="pc-title">Перегруз одного владельца</span><span class="badge high">Высокий</span></div>
+      <p class="pc-desc">Намиг Алмамедов — owner у 208 карточек (18% всего Downstream). Один человек не может эффективно управлять таким объёмом.</p>
+    </div>
+    <div class="pc high">
+      <div class="pc-head"><span class="pc-title">71 активный баг не закрыт</span><span class="badge high">Высокий</span></div>
+      <p class="pc-desc">28 в Downstream + 43 в Доске ценностей. Доля Bug-типа в Downstream — 28% от всех карточек.</p>
+    </div>
+    <div class="pc medium">
+      <div class="pc-head"><span class="pc-title">Оценка задач не стандартизирована</span><span class="badge medium">Средний</span></div>
+      <p class="pc-desc">32% карточек Downstream без оценки. В Доске ценностей — 7 разных единиц (sp, ч, h, d, m, M, смешанные формулы).</p>
+    </div>
+    <div class="pc medium">
+      <div class="pc-head"><span class="pc-title">Доска ценностей без дедлайнов и лейнов</span><span class="badge medium">Средний</span></div>
+      <p class="pc-desc">95.5% карточек без дедлайна (743/778). Лейны не используются — нет сегментации 370 активных задач по направлениям.</p>
+    </div>
+    <div class="pc medium">
+      <div class="pc-head"><span class="pc-title">Completion rate Downstream — 54%</span><span class="badge medium">Средний</span></div>
+      <p class="pc-desc">612 из 1 132 задач достигли «Готово». Почти половина задач не завершается или теряется на стадиях.</p>
+    </div>
+    <div class="pc low">
+      <div class="pc-head"><span class="pc-title">Непоследовательное именование</span><span class="badge low">Низкий</span></div>
+      <p class="pc-desc">«anastasia_miheicheva» вместо ФИО, «Андрей Гафаров » (с пробелом). Фильтрация и аналитика ломается.</p>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="sec"><h2>Аналитика данных</h2></div>
+  <div class="cgrid2">
+    <div class="cc">
+      <h3>Воронка Downstream</h3>
+      <p class="hint">Сколько карточек прошло каждую стадию — потери от входа до «Готово»</p>
+      <svg id="svgFunnel" viewBox="0 0 520 220"></svg>
+    </div>
+    <div class="cc">
+      <h3>Активные задачи Доски ценностей по стадиям</h3>
+      <p class="hint">Где сейчас находятся 370 активных задач — видно горлышко</p>
+      <svg id="svgVB" viewBox="0 0 520 220"></svg>
+    </div>
+    <div class="cc">
+      <h3>Нагрузка на владельцев — Downstream</h3>
+      <p class="hint">Топ-8 по количеству карточек во владении</p>
+      <svg id="svgOwners" viewBox="0 0 520 220"></svg>
+    </div>
+    <div class="cc">
+      <h3>Типы карточек</h3>
+      <p class="hint">Downstream vs Доска ценностей — сравнение структуры</p>
+      <svg id="svgTypes" viewBox="0 0 520 220"></svg>
+    </div>
+  </div>
+
+  <div class="cgrid2">
+    <div class="cc">
+      <h3>Топ тегов — Downstream</h3>
+      <div id="tagDS"></div>
+    </div>
+    <div class="cc">
+      <h3>Топ тегов — Доска ценностей</h3>
+      <div id="tagVB"></div>
+    </div>
+  </div>
+
+  <!-- Variant 1 -->
+  <div class="sec"><h2>Два варианта развития</h2></div>
+  <div class="vsplit">
+    <div class="vbox">
+      <div class="vbox-head">
+        <h3>Вариант 1 — Data-Driven PMO</h3>
+        <span class="vtag">Стратегический · 2–3 месяца</span>
+      </div>
+      <p class="vdesc">Прежде чем улучшать процессы, нужно их видеть. Сейчас PMO работает вслепую. Первый шаг — сделать данные достоверными и полными, затем строить на них аналитику.</p>
+      <table class="vtable">
+        <tr><th>#</th><th>Область</th><th>Действие</th><th>Детали</th><th>Эффект</th><th>Усилие</th></tr>
+        <tr><td>1</td><td>Измеримость</td><td>Тайм-трекинг обязательным</td><td>В DoD: каждая задача — залогированное время. Цель 80% за 2 спринта.</td><td class="eff-h">Высокий</td><td>Низкий</td></tr>
+        <tr><td>2</td><td>Стандарты</td><td>Единица оценки → только SP</td><td>Запретить смешанные форматы. Ретро-оценка 78 неоценённых активных задач.</td><td class="eff-h">Высокий</td><td>Средний</td></tr>
+        <tr><td>3</td><td>Видимость</td><td>Лейны на Доске ценностей</td><td>Создать лейны: 1С, Backend, Frontend, FIT Fleet, Mobile.</td><td class="eff-m">Средний</td><td>Низкий</td></tr>
+        <tr><td>4</td><td>Дедлайны</td><td>Дедлайны активным задачам</td><td>Планинг для 370 задач. Сейчас 95.5% без дедлайна.</td><td class="eff-h">Высокий</td><td>Средний</td></tr>
+        <tr><td>5</td><td>Метрики</td><td>Дашборд completion + velocity</td><td>Еженедельный отчёт. Baseline: 54% completion rate.</td><td class="eff-m">Средний</td><td>Средний</td></tr>
+        <tr><td>6</td><td>Гигиена</td><td>Стандарт именования</td><td>Единый формат ФИО, объединение дублей карточек.</td><td class="eff-l">Низкий</td><td>Низкий</td></tr>
+      </table>
+      <div class="callout info" style="margin:12px">
+        <b>Через 2 месяца:</b>
+        <p>Velocity измерим в SP/спринт · Completion rate 54%→70%+ · Roadmap с реальными дедлайнами</p>
+      </div>
+    </div>
+    <div class="vbox">
+      <div class="vbox-head">
+        <h3>Вариант 2 — Flow &amp; Quality Fix</h3>
+        <span class="vtag">Тактический · 3–4 недели</span>
+      </div>
+      <p class="vdesc">Данные уже указывают на провалы в потоке — можно действовать немедленно. Разблокировать горлышко, раздать нагрузку, закрыть баги. Быстрые победы за 3–4 недели.</p>
+      <table class="vtable">
+        <tr><th>#</th><th>Область</th><th>Действие</th><th>Детали</th><th>Эффект</th><th>Усилие</th></tr>
+        <tr><td>1</td><td>Баги</td><td>Bug-спринт: закрыть 71 баг</td><td>Выделить 1 спринт исключительно на баги: 43 VB + 28 Downstream.</td><td class="eff-h" style="color:#C0392B">Критично</td><td>Высокий</td></tr>
+        <tr><td>2</td><td>Поток</td><td>Разблокировать приоритезацию</td><td>114 задач в горлышке. Сессия + WIP-лимит ≤ 20 на колонку.</td><td class="eff-h">Высокий</td><td>Средний</td></tr>
+        <tr><td>3</td><td>Нагрузка</td><td>Перераспределить workload</td><td>208 карточек на Намиге. Аудит: какие реально его, какие не переназначены.</td><td class="eff-h">Высокий</td><td>Средний</td></tr>
+        <tr><td>4</td><td>WIP</td><td>WIP-лимиты на всех стадиях</td><td>В работе ≤ 5 на команду, CodeReview ≤ 3. Сейчас нет ограничений.</td><td class="eff-h">Высокий</td><td>Средний</td></tr>
+        <tr><td>5</td><td>Качество</td><td>Bug SLA + автоэскалатор</td><td>P1: 24ч, P2: 3 дня, P3: спринт. Баг без owner &gt;2 дней → «Срочно».</td><td class="eff-h">Высокий</td><td>Высокий</td></tr>
+        <tr><td>6</td><td>Архив</td><td>Аудит незавершённых задач</td><td>46% Downstream в архиве. Какие Done, какие брошены? Зачистить бэклог.</td><td class="eff-m">Средний</td><td>Низкий</td></tr>
+      </table>
+      <div class="callout warn" style="margin:12px">
+        <b>Через 1 месяц:</b>
+        <p>71 бага → менее 10 · Горлышко расчищено · Намиг А. разгружен на 60%+ · WIP-лимиты работают</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compare -->
+  <div class="sec"><h2>Сравнение вариантов</h2></div>
+  <table class="ctable">
+    <tr><th>Критерий</th><th>Вариант 1 — Data-Driven PMO</th><th>Вариант 2 — Flow &amp; Quality Fix</th></tr>
+    <tr><td>Горизонт</td><td>2–3 месяца</td><td>3–4 недели</td></tr>
+    <tr><td>Первый результат</td><td>Dashboards и метрики через 1 месяц</td><td>Баги закрыты + поток разблокирован через 2 нед.</td></tr>
+    <tr><td>Основной акцент</td><td>Видимость, измеримость, стандарты данных</td><td>Скорость доставки, качество, баланс нагрузки</td></tr>
+    <tr><td>Главный риск</td><td>Культурные изменения — медленно приживаются</td><td>Без метрик сложно закрепить улучшения</td></tr>
+    <tr><td>Что требует</td><td>Дисциплины команды и настройки инструментов</td><td>Решений PM и готовности переработать бэклог</td></tr>
+    <tr><td>Лучше если...</td><td>Команда стабильна, нужна системность</td><td>Есть давление на delivery прямо сейчас</td></tr>
+  </table>
+
+  <div class="callout success gap">
+    <b>Рекомендация — запустить оба варианта параллельно</b>
+    <p>Вариант 2 даёт быстрые победы и доверие команды в первый же месяц. Вариант 1 строит фундамент для долгосрочного управления. Начать с разблокировки горлышка (114 задач) и bug-спринта — 1–2 недели, немедленный видимый эффект.</p>
+  </div>
+
+  <div class="footer">
+    Источники: Downstream-2.0-2026-10-16T08_46_38.885Z.xlsx (1 132 строки) · 💰-Доска-ценностей-2026-10-16T04_13_15.970Z.xlsx (778 строк) · Анализ выполнен 19.10.2026
+  </div>
+
+</div><!-- /page -->
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+function se(tag,a={}){const el=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(a))el.setAttribute(k,v);return el;}
+
+/* ── Horizontal bar chart ── */
+function hbar(svgId, cats, vals, color, refVal){
+  const svg=document.getElementById(svgId);
+  const W=520,H=220,pl=150,pr=60,pt=16,pb=8;
+  const cw=W-pl-pr,ch=H-pt-pb;
+  const maxV=Math.max(...vals)*1.08;
+  const bH=Math.min(22, (ch/cats.length)-6);
+  const step=(ch/cats.length);
+
+  // ref line
+  if(refVal){
+    const rx=pl+refVal/maxV*cw;
+    svg.appendChild(se('line',{x1:rx,y1:pt-4,x2:rx,y2:H-pb,
+      stroke:'#C0392B','stroke-width':'1.5','stroke-dasharray':'4,3'}));
+    const rt=se('text',{x:rx+4,y:pt,'font-size':'9.5','fill':'#C0392B','dominant-baseline':'hanging','font-weight':'700'});
+    rt.textContent=refVal;
+    svg.appendChild(rt);
+  }
+
+  cats.forEach((cat,i)=>{
+    const y=pt+i*step+(step-bH)/2;
+    const bw=vals[i]/maxV*cw;
+    // bg
+    svg.appendChild(se('rect',{x:pl,y,width:cw,height:bH,fill:'#EEF1F5',rx:'3'}));
+    // bar
+    svg.appendChild(se('rect',{x:pl,y,width:bw,height:bH,fill:color,rx:'3'}));
+    // label left
+    const lt=se('text',{x:pl-7,y:y+bH/2,'text-anchor':'end','dominant-baseline':'middle',
+      'font-size':'11','fill':'#142B4D'});
+    lt.textContent=cat.length>18?cat.slice(0,17)+'…':cat;
+    svg.appendChild(lt);
+    // value
+    const inside=bw>38;
+    const vt=se('text',{x:inside?pl+bw-5:pl+bw+5,y:y+bH/2,
+      'text-anchor':inside?'end':'start','dominant-baseline':'middle',
+      'font-size':'11','font-weight':'700','fill':inside?'#fff':color});
+    vt.textContent=vals[i];
+    svg.appendChild(vt);
+  });
+}
+
+/* ── Pie chart ── */
+function pie(svg, cx, cy, R, data){
+  const total=data.reduce((s,d)=>s+d.v,0);
+  const colors=['#1F8A8A','#C0392B','#E08E0B','#5B7FA6','#8B6BAE','#27AE60','#8899AA'];
+  let angle=-Math.PI/2;
+  data.forEach((d,i)=>{
+    const sweep=d.v/total*2*Math.PI;
+    const x1=cx+R*Math.cos(angle), y1=cy+R*Math.sin(angle);
+    const x2=cx+R*Math.cos(angle+sweep), y2=cy+R*Math.sin(angle+sweep);
+    const la=sweep>Math.PI?1:0;
+    const path=se('path',{
+      d:`M ${cx} ${cy} L ${x1.toFixed(1)} ${y1.toFixed(1)} A ${R} ${R} 0 ${la} 1 ${x2.toFixed(1)} ${y2.toFixed(1)} Z`,
+      fill:colors[i%colors.length],stroke:'#fff','stroke-width':'1.5'});
+    svg.appendChild(path);
+    // label for big slices
+    if(d.v/total>0.08){
+      const ma=angle+sweep/2;
+      const lx=cx+R*0.65*Math.cos(ma), ly=cy+R*0.65*Math.sin(ma);
+      const lt=se('text',{x:lx.toFixed(1),y:ly.toFixed(1),'text-anchor':'middle',
+        'dominant-baseline':'middle','font-size':'10','font-weight':'700','fill':'#fff'});
+      lt.textContent=Math.round(d.v/total*100)+'%';
+      svg.appendChild(lt);
+    }
+    angle+=sweep;
+  });
+  // legend
+  data.forEach((d,i)=>{
+    const lx=cx+R+16, ly=cy-R+i*20+10;
+    if(ly>cy+R+5)return;
+    svg.appendChild(se('rect',{x:lx,y:ly-6,width:11,height:11,fill:colors[i%colors.length],rx:'2'}));
+    const lt=se('text',{x:lx+15,y:ly,'font-size':'10','fill':'#555B66','dominant-baseline':'middle'});
+    lt.textContent=d.l+(d.v?' ('+d.v+')':'');
+    svg.appendChild(lt);
+  });
+}
+
+/* ── Tag bars ── */
+function tagBars(containerId, labels, vals, maxV){
+  const el=document.getElementById(containerId);
+  labels.forEach((lbl,i)=>{
+    const pct=Math.round(vals[i]/maxV*100);
+    el.innerHTML+=
+      '<div class="tbar-row">'+
+        '<div class="tbar-label"><span>'+lbl+'</span><span>'+vals[i]+'</span></div>'+
+        '<div class="tbar-bg"><div class="tbar-fill" style="width:'+pct+'%"></div></div>'+
+      '</div>';
+  });
+}
+
+/* ── Init ── */
+// Downstream funnel
+hbar('svgFunnel',
+  ['Очередь','В работе','Демо','Автотесты','CodeReview','Тестирование','Ready to Rel.','Receive fb.','Гот./Инстр.','Готово/Готово'],
+  [1132,1082,1063,1063,1060,1058,1048,1037,1023,612],
+  '#1F8A8A', 612);
+
+// VB active by stage
+hbar('svgVB',
+  ['Приор./Готово','Приор./Очередь','Гот./Инструкция','Проектирование','Гот./Готово','Очередь','Разраб./Очередь','Разраб./В работе','Разраб./Декомп.','Приемка'],
+  [114,41,41,34,31,30,30,20,16,13],
+  '#C0392B', null);
+
+// Owners
+hbar('svgOwners',
+  ['Намиг А.','Вл. Кондаков','Вл. Соколенко','М. Кузнецов','Никита Б.','А. Федоренко','Д. Никитина','Кочетов А.'],
+  [208,124,90,71,65,60,54,51],
+  '#E08E0B', null);
+
+// Types pies
+const svgT=document.getElementById('svgTypes');
+// DS pie (left)
+const g1=se('g',{});
+pie(g1, 130, 110, 90,
+  [{l:'FIT Team',v:507},{l:'Bug',v:320},{l:'Card',v:226},{l:'Change',v:34},{l:'Ценность FIT',v:22},{l:'Ценность',v:19},{l:'Прочее',v:4}]);
+const t1=se('text',{x:130,y:210,'text-anchor':'middle','font-size':'11','font-weight':'700','fill':'#142B4D'});
+t1.textContent='Downstream';
+g1.appendChild(t1);
+svgT.appendChild(g1);
+// VB pie (right)
+const g2=se('g',{transform:'translate(260,0)'});
+pie(g2, 130, 110, 90,
+  [{l:'Ценность FIT',v:405},{l:'Ценность',v:249},{l:'Bug',v:81},{l:'FIT Team',v:30},{l:'Прочее',v:13}]);
+const t2=se('text',{x:130,y:210,'text-anchor':'middle','font-size':'11','font-weight':'700','fill':'#142B4D'});
+t2.textContent='Доска ценностей';
+g2.appendChild(t2);
+svgT.appendChild(g2);
+
+// Tags
+tagBars('tagDS',
+  ['Backend','Frontend','1С','FITPRO','Bug','mobile','APP','FIT Fleet','Дашборд МП','FIT ERP'],
+  [291,226,210,191,185,164,158,141,136,102], 291);
+tagBars('tagVB',
+  ['1С','FIT Fleet','Backend','Продемили','Frontend','Дашборд МП','АВТОХАБ','Fit','FITPRO','FIT ERP'],
+  [220,179,167,129,93,67,58,55,45,43], 220);
+</script>
+</body>
+</html>
