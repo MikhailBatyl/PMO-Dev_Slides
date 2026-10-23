@@ -95,9 +95,9 @@ body{background:#0f1923;display:flex;align-items:center;justify-content:center;
   flex-shrink:0;line-height:1.35}
 .cav strong{color:#555B66}
 
-/* VSM + priority slides (s3, s4) */
-#s3,#s4{padding:22px 36px 12px}
-#s3 .sh,#s4 .sh{margin-bottom:8px}
+/* VSM + priority slides (s3, s4) + bugs (s5) */
+#s3,#s4,#s5{padding:22px 36px 12px}
+#s3 .sh,#s4 .sh,#s5 .sh{margin-bottom:8px}
 #s3 .sh h1{font-size:28px}
 #s3 .sh h2{font-size:16px;margin-top:3px}
 #s4 .sh h1{font-size:28px}
@@ -197,6 +197,20 @@ table.mini td:first-child{font-weight:700;white-space:nowrap}
 .rice-mid table.mini{font-size:15px}
 .rice-mid table.mini th{font-size:13px}
 .rice-mid table.mini th,.rice-mid table.mini td{padding:7px 10px}
+
+#s5 .s5b{flex:1;display:flex;flex-direction:column;min-height:0;gap:10px}
+#s5 .s5chart{flex:1;min-height:0;padding:12px 16px 8px;overflow:hidden}
+#s5 .s5chart h3{font-size:18px;margin-bottom:4px}
+#s5 .s5chart .hint{font-size:14px;line-height:1.4;margin-bottom:6px}
+#s5 .s5chart figure{flex:1;min-height:0}
+#s5 .s5chart svg{width:100%;height:100%}
+#s5 .formula{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex-shrink:0}
+#s5 .fb{background:#F5F7FA;border-radius:12px;padding:12px 16px;border:1px solid #E8ECF2}
+#s5 .fb b{display:block;font-size:15px;margin-bottom:6px}
+#s5 .fb .eq{font-size:16px;font-weight:700;color:#142B4D;margin:0 0 8px;line-height:1.35}
+#s5 .fb p,#s5 .fb li{font-size:14px;line-height:1.45;color:#3A4D60}
+#s5 .fb ul{margin:4px 0 0 18px}
+#s5 .leg{margin:4px 0 0}
 
 /* Nav */
 #nav{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
@@ -549,6 +563,51 @@ table.mini td:first-child{font-weight:700;white-space:nowrap}
     </div>
   </section>
 
+  <!-- ═══════ SLIDE 5: bugs inflow vs stock ═══════ -->
+  <section class="slide" id="s5" aria-label="Слайд 5: приток и склад багов">
+    <div class="sh">
+      <h1>Приток и склад багов на одной оси спринтов</h1>
+      <h2>Downstream 2.0 · спринты по 2 недели · 28.05–16.10.2026</h2>
+    </div>
+    <div class="s5b">
+      <div class="cc s5chart">
+        <p class="hint">В каждом спринте два столбика: слева <b>приток</b>, справа <b>склад</b>. Над стрелкой — часы переходящего склада на следующий спринт. Под стрелкой — сколько <b>закрыли</b>. Бирюзовая стрелка: закрыли ≥ завели; красная: закрыли меньше. Красные часы — выше буфера 224 ч.</p>
+        <figure><svg id="s5Combo" viewBox="0 0 1760 520" role="img" aria-label="Приток и склад багов по спринтам"></svg></figure>
+        <div class="leg">
+          <i style="--c:#1A7A6A">1С</i>
+          <i style="--c:#5B7FA6">Web</i>
+          <i style="--c:#C0392B">Mobile</i>
+          <i style="--c:#8899AA">бледный столбик — приток, плотный — склад</i>
+        </div>
+      </div>
+      <div class="formula">
+        <div class="fb">
+          <b>Формула склада</b>
+          <div class="eq">склад на конец = склад на начало + приток − закрыли</div>
+          <p>Пример спринта с 23.07 (на графике подписано у этой пары):</p>
+          <p><b>33 + 47 − 53 = 27</b></p>
+          <ul>
+            <li>33 — склад на конец прошлого спринта (с 09.07, плотный столбик)</li>
+            <li>47 — приток с 23.07 (бледный столбик, из них Web 40)</li>
+            <li>53 — закрыли за спринт (под стрелкой)</li>
+            <li>27 — склад на конец с 23.07 (плотный столбик). Это не 47.</li>
+          </ul>
+        </div>
+        <div class="fb">
+          <b>Что входит в расчётное время над складом</b>
+          <div class="eq">часы = (1С×3 + Web×2 + Mobile×2) SP × 4 ч</div>
+          <p>Оценка, сколько часов заберёт <b>весь текущий склад</b>, если закрывать его в следующем спринте.</p>
+          <ul>
+            <li><b>Входит:</b> открытые баги на конец спринта по платформам. 1С-баг ≈ 3 SP, Web/Mobile ≈ 2 SP (S). 1 SP = 4 ч, 1 чел. = 80 ч/спринт.</li>
+            <li><b>Не входит:</b> новые баги следующего спринта, продуктовые задачи, PMO, факт списанных часов.</li>
+          </ul>
+          <p style="margin-top:6px">Пример 16.10: 4×3 + 5×2 + 16×2 = <b>54 SP × 4 ч = 216 ч</b> ≈ 2,7 чел. Из них Mobile 16×2×4 = 128 ч при ёмкости Flutter 80 ч.</p>
+        </div>
+      </div>
+    </div>
+    <div class="sf">Серая подложка объединяет пару одного спринта. Не сравнивайте правый столбик спринта с левым столбиком следующего. Источники: выгрузки Kaiten 16.10.2026, Downstream 2.0.</div>
+  </section>
+
  </div>
 </div>
 
@@ -558,7 +617,8 @@ table.mini td:first-child{font-weight:700;white-space:nowrap}
  <span class="nd" data-n="1"></span>
  <span class="nd" data-n="2"></span>
  <span class="nd" data-n="3"></span>
- <span class="nc" id="nc">1/4</span>
+ <span class="nd" data-n="4"></span>
+ <span class="nc" id="nc">1/5</span>
  <button class="nb" id="nb" aria-label="Вперёд">&#8594;</button>
 </nav>
 
@@ -619,6 +679,18 @@ const DATA = {
      why:"Flutter: 67% закрытых — баги (24 карточки, n мал). 1С: очередь ≈2 спринта SP",
      metric:"Решение на данных",term:"6 спринтов"}
   ],
+  bugs:[
+    {name:"28.05",createdBugs:29,closedBugs:5,openBugs:40,by:{"1С":{createdBugs:2,openBugs:4},Web:{createdBugs:14,openBugs:23},Mobile:{createdBugs:13,openBugs:13}}},
+    {name:"11.06",createdBugs:15,closedBugs:30,openBugs:25,by:{"1С":{createdBugs:4,openBugs:1},Web:{createdBugs:2,openBugs:6},Mobile:{createdBugs:9,openBugs:18}}},
+    {name:"25.06",createdBugs:29,closedBugs:20,openBugs:34,by:{"1С":{createdBugs:7,openBugs:8},Web:{createdBugs:9,openBugs:13},Mobile:{createdBugs:13,openBugs:13}}},
+    {name:"09.07",createdBugs:15,closedBugs:16,openBugs:33,by:{"1С":{createdBugs:1,openBugs:5},Web:{createdBugs:14,openBugs:26},Mobile:{createdBugs:0,openBugs:2}}},
+    {name:"23.07",createdBugs:47,closedBugs:53,openBugs:27,by:{"1С":{createdBugs:2,openBugs:6},Web:{createdBugs:40,openBugs:17},Mobile:{createdBugs:5,openBugs:4}}},
+    {name:"06.08",createdBugs:21,closedBugs:16,openBugs:32,by:{"1С":{createdBugs:0,openBugs:2},Web:{createdBugs:1,openBugs:8},Mobile:{createdBugs:20,openBugs:22}}},
+    {name:"20.08",createdBugs:25,closedBugs:39,openBugs:18,by:{"1С":{createdBugs:3,openBugs:4},Web:{createdBugs:17,openBugs:13},Mobile:{createdBugs:5,openBugs:1}}},
+    {name:"03.09",createdBugs:35,closedBugs:14,openBugs:39,by:{"1С":{createdBugs:2,openBugs:2},Web:{createdBugs:8,openBugs:13},Mobile:{createdBugs:25,openBugs:24}}},
+    {name:"17.09",createdBugs:18,closedBugs:40,openBugs:17,by:{"1С":{createdBugs:4,openBugs:5},Web:{createdBugs:6,openBugs:9},Mobile:{createdBugs:8,openBugs:3}}},
+    {name:"01.10",createdBugs:36,closedBugs:28,openBugs:25,by:{"1С":{createdBugs:4,openBugs:4},Web:{createdBugs:11,openBugs:5},Mobile:{createdBugs:21,openBugs:16}}}
+  ],
   caveats:[
     "Размеры в разных единицах (SP в 1С, часы в Web) — объём по линиям сравнивать нельзя.",
     "Массовые закрытия (29.07: 62; 05.08: 53; 21.09: 56 карточек) — ориентироваться на тренд.",
@@ -629,7 +701,8 @@ const DATA = {
 
 /* ── Palette ── */
 const C={dark:'#142B4D',teal:'#1F8A8A',red:'#C0392B',
-  amber:'#E08E0B',gray:'#555B66',lg:'#DDE3EB',white:'#FFFFFF'};
+  amber:'#E08E0B',gray:'#555B66',lg:'#DDE3EB',white:'#FFFFFF',
+  c1:'#1A7A6A',web:'#5B7FA6',mob:'#C0392B'};
 
 /* ── SVG helpers ── */
 const NS='http://www.w3.org/2000/svg';
@@ -1012,6 +1085,81 @@ function drawGauge(id,value,maxVal,color,showOverflow){
 }
 
 /* ════════════════════════════════════
+   SLIDE 5: bug inflow vs stock
+════════════════════════════════════ */
+const BUG_SP={'1С':3,Web:2,Mobile:2};
+const CAP_SP_ALL=280, H_PER_SP=4, BUF_H=CAP_SP_ALL*H_PER_SP*0.2;
+function loadSP(by){return by['1С'].openBugs*BUG_SP['1С']+by.Web.openBugs*BUG_SP.Web+by.Mobile.openBugs*BUG_SP.Mobile;}
+function hoursOf(by){return loadSP(by)*H_PER_SP;}
+
+function drawBugCombo(id, sprints){
+  const svg=document.getElementById(id);
+  if(!svg) return;
+  const W=1760,H=520,p={t:88,r:16,b:62,l:48};
+  const n=sprints.length;
+  const inflow=sprints.map(s=>s.createdBugs);
+  const stock=sprints.map(s=>s.openBugs);
+  const closed=sprints.map(s=>s.closedBugs);
+  const maxV=Math.max(...inflow,...stock)*1.18||1;
+  const cw=W-p.l-p.r, ch=H-p.t-p.b, gW=cw/n;
+  const barW=gW*0.28, gap=gW*0.07;
+  const y=v=>p.t+ch-v/maxV*ch;
+  const cols=[C.c1,C.web,C.mob];
+  const defs=se('defs');
+  [['Up',C.red],['Dn',C.teal]].forEach(([suf,col])=>{
+    const m=se('marker',{id:id+suf,viewBox:'0 0 8 8',refX:'7',refY:'4',markerWidth:'7',markerHeight:'7',orient:'auto'});
+    m.appendChild(se('path',{d:'M0 1 L8 4 L0 7 Z',fill:col}));
+    defs.appendChild(m);
+  });
+  svg.appendChild(defs);
+  [0,0.5,1].forEach(f=>{
+    const v=Math.round(maxV*f), yy=y(v);
+    svg.appendChild(se('line',{x1:p.l,y1:yy,x2:W-p.r,y2:yy,stroke:'#E8ECF2'}));
+    svg.appendChild(st(p.l-8,yy,v,{'font-size':'14','fill':C.gray,'text-anchor':'end'}));
+  });
+  sprints.forEach((_,i)=>{
+    if(i%2) return;
+    svg.appendChild(se('rect',{x:p.l+i*gW,y:p.t,width:gW,height:ch,fill:'#F3F6FA',rx:'6'}));
+  });
+  function stack(x, parts, op){
+    let acc=0;
+    parts.forEach((v,si)=>{
+      if(!v) return;
+      const y1=y(acc+v), y0=y(acc), h=Math.max(y0-y1,0);
+      const r=se('rect',{x,y:y1,width:barW,height:h,fill:cols[si],rx:'3'});
+      if(op<1) r.setAttribute('opacity', String(op));
+      svg.appendChild(r);
+      if(v>=5 && h>=16) svg.appendChild(st(x+barW/2, y1+h/2, v, {'font-size':'13','fill':'#fff','font-weight':'700'}));
+      acc+=v;
+    });
+  }
+  sprints.forEach((s,i)=>{
+    const gX=p.l+i*gW;
+    const xIn=gX+gW*0.16, xSt=xIn+barW+gap;
+    const created=[s.by['1С'].createdBugs,s.by.Web.createdBugs,s.by.Mobile.createdBugs];
+    const opened=[s.by['1С'].openBugs,s.by.Web.openBugs,s.by.Mobile.openBugs];
+    stack(xIn, created, 0.48);
+    stack(xSt, opened, 1);
+    svg.appendChild(st(xIn+barW/2, y(inflow[i])-12, inflow[i], {'font-size':'15','fill':C.dark,'font-weight':'700'}));
+    svg.appendChild(st(xSt+barW/2, y(stock[i])-12, stock[i], {'font-size':'15','fill':C.dark,'font-weight':'700'}));
+    const kept=closed[i]>=inflow[i], col=kept?C.teal:C.red;
+    const cxIn=xIn+barW/2, cxSt=xSt+barW/2, mid=(cxIn+cxSt)/2, ay=42;
+    const hrs=hoursOf(s.by), over=hrs>BUF_H, tcol=over?C.red:C.teal;
+    svg.appendChild(st(mid, 18, hrs+' ч', {'font-size':'15','fill':tcol,'font-weight':'700'}));
+    svg.appendChild(se('line',{x1:cxIn+6,y1:ay,x2:cxSt-10,y2:ay,stroke:col,'stroke-width':'2.2','marker-end':'url(#'+id+(kept?'Dn':'Up')+')'}));
+    svg.appendChild(st(mid, ay+16, 'закрыли '+closed[i], {'font-size':'13','fill':col,'font-weight':'700'}));
+    svg.appendChild(st(gX+gW/2, H-p.b+16, 'с '+s.name, {'font-size':'14','fill':C.gray}));
+    if(i===0){
+      svg.appendChild(st(xIn+barW/2, H-p.b+34, 'приток', {'font-size':'12','fill':C.gray}));
+      svg.appendChild(st(xSt+barW/2, H-p.b+34, 'склад', {'font-size':'12','fill':C.gray}));
+    }
+    if(i===4){
+      svg.appendChild(st(gX+gW/2, H-p.b+34, '33+47−53=27', {'font-size':'13','fill':C.teal,'font-weight':'700'}));
+    }
+  });
+}
+
+/* ════════════════════════════════════
    INIT
 ════════════════════════════════════ */
 function init(){
@@ -1151,6 +1299,8 @@ function init(){
   document.getElementById('cav').innerHTML=
     '<strong>Ограничения данных:</strong> '+
     DATA.caveats.map((c,i)=>(i+1)+'. '+c).join(' ');
+
+  drawBugCombo('s5Combo', DATA.bugs);
 
   // Scale + show slide 1
   rescale();
