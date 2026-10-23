@@ -170,10 +170,12 @@ table.mini td:first-child{font-weight:700;white-space:nowrap}
 .rice-type .sub{font-size:14px;color:#555B66;margin-top:4px}
 .rice-formula{background:#fff;border-radius:12px;padding:12px 16px;
   box-shadow:0 2px 8px rgba(20,43,77,.08);flex-shrink:0;
-  display:flex;align-items:center;justify-content:flex-start;gap:14px}
-.rice-formula .eq{font-size:22px;font-weight:800;color:#142B4D;flex-shrink:0}
+  display:flex;align-items:flex-start;justify-content:flex-start;gap:18px}
+.rice-formula .eq{font-size:22px;font-weight:800;color:#142B4D;flex-shrink:0;
+  line-height:1.25;white-space:nowrap}
 .rice-formula .eq b{color:#1F8A8A}
-.rice-formula .note{font-size:16px;color:#555B66;line-height:1.4}
+.rice-formula .note{font-size:15px;color:#555B66;line-height:1.4}
+.rice-formula .note b{color:#142B4D;font-weight:700}
 .rice-split{flex:0 0 auto;display:grid;grid-template-columns:1.25fr .75fr;gap:10px}
 .rice .card{flex:none;min-height:0;display:flex;flex-direction:column}
 .rice .card h3{flex-shrink:0;font-size:17px;margin-bottom:8px}
@@ -496,8 +498,15 @@ table.mini td:first-child{font-weight:700;white-space:nowrap}
       </div>
 
       <div class="rice-formula">
-        <div class="eq">Клетка = приоритет</div>
-        <p class="note">Ценность: слабый / средний / сильный. Размер: S до 2 SP · M 3–5 SP · L 8 SP и больше. Нет постановки — в матрицу не кладём.</p>
+        <div class="eq">Приоритет = <b>ценность</b> ÷ <b>размер (SP)</b></div>
+        <p class="note">
+          Чем больше пользы на единицу работы — тем раньше берём. Карточка попадает в клетку матрицы справа: строка — ценность, столбец — размер.
+          <br>
+          <b>Ценность (ставит PMO):</b> слабый = 1 · средний = 2 · сильный = 3.
+          <b>Размер (ставит Dev):</b> точный SP; для клетки — S ≤ 2 · M 3–5 · L ≥ 8.
+          <br>
+          Пример: сильная S на 2 SP → 3 ÷ 2 = 1,5 — брать первыми. Слабая L на 8 SP → 1 ÷ 8 = 0,13 — не брать. Нет постановки — в бэклог не кладём.
+        </p>
       </div>
 
       <div class="rice-split">
