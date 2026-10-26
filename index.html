@@ -136,7 +136,18 @@ body{background:#0f1923;display:flex;align-items:center;justify-content:center;
 .order ol{margin:0;padding:0;list-style:none;flex:1;min-height:0;
   display:flex;flex-direction:column}
 .order li{display:flex;gap:12px;align-items:flex-start;flex:1;
-  padding:6px 0;border-top:1px solid #E8ECF2}
+  padding:4px 0;border-top:1px solid #E8ECF2}
+.order li>.body{flex:1;min-width:0}
+.staff{display:flex;gap:8px;margin-top:3px;align-items:stretch}
+.staff .cell{flex:1;background:#F5F7FA;border-radius:8px;padding:4px 10px;
+  display:flex;align-items:center;gap:8px;min-width:0}
+.staff .k{font-size:14px;font-weight:800;color:#142B4D;flex-shrink:0}
+.staff .f{font-size:13px;color:#555B66;line-height:1.25;flex:1}
+.staff .cell b{font-size:22px;font-weight:800;color:#142B4D;line-height:1;flex-shrink:0}
+.staff .tot{flex:0 0 210px;background:#E8F6F5;border-radius:8px;padding:3px 10px;
+  display:flex;flex-direction:column;justify-content:center}
+.staff .tot b{font-size:20px;font-weight:800;color:#1F8A8A;line-height:1}
+.staff .tot span{font-size:12px;color:#555B66;line-height:1.25}
 .order li:first-child{border-top:0;padding-top:0}
 .order .n{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#1F8A8A;
   color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;
@@ -488,7 +499,7 @@ table.mini td:first-child{font-weight:700;white-space:nowrap}
           <div>
             <div class="head"><b>Ёмкость 1С</b><span class="who both">PMO + Dev</span></div>
             <p>Не отдавать в разработку больше, чем команда успеет за спринт. Пока очередь длиннее спринта — новые карточки не добавлять.</p>
-            <p class="goal">1С: 384 ч на продукт и 96 ч на баги. Очередь — не длиннее одного спринта (сейчас два).</p>
+            <p class="goal">1С — 8 человек: 512 ч продукт и 128 ч буфер. Очередь — не длиннее одного спринта (сейчас два).</p>
           </div>
         </li>
         <li>
@@ -501,10 +512,15 @@ table.mini td:first-child{font-weight:700;white-space:nowrap}
         </li>
         <li>
           <span class="n" aria-hidden="true">4</span>
-          <div>
+          <div class="body">
             <div class="head"><b>Оценка: 1 SP = 4 часа</b><span class="who dev">Dev</span></div>
-            <p>Принимаем в работу по аналитике Kaiten: 1 story point = 4 часа (полдня одного разработчика). Спринт человека — 80 ч = 20 SP, шестеро 1С — 120 SP на спринт. Проставить оценку на 28 карточек 1С без размера.</p>
-            <p class="goal">У каждой активной карточки 1С есть оценка. В «Готово» — дата закрытия, иначе очередь снова считают на глаз.</p>
+            <p>Спринт человека — 80 ч = 20 SP. Штат по ритму входа: люди = приток ÷ 20 SP.</p>
+            <div class="staff" aria-label="Согласованный штат">
+              <div class="cell"><span class="k">1С</span><span class="f">171 SP ÷ 20 = 8,6 → в работе 160 SP</span><b>8</b></div>
+              <div class="cell"><span class="k">WEB</span><span class="f">7 на ритм + 1 на буфер 20%</span><b>8</b></div>
+              <div class="cell"><span class="k">Mobile</span><span class="f">144 ч багов ÷ 80 ч = 1,8</span><b>2</b></div>
+              <div class="tot"><b>18</b><span>было 14 · 1С +2 · WEB +1 · Mobile +1</span></div>
+            </div>
           </div>
         </li>
         <li>
@@ -512,7 +528,7 @@ table.mini td:first-child{font-weight:700;white-space:nowrap}
           <div>
             <div class="head"><b>Буфер спринта 80 / 20</b><span class="who dev">Dev</span></div>
             <p>80% спринта — запланированная ценность. 20% заранее оставляем на баги, срочное и замечания. Эту квоту нельзя заранее забить фичами.</p>
-            <p class="goal">1С: 384 ч продукт + 96 ч буфер. Web: 512 ч продукт + 128 ч буфер.</p>
+            <p class="goal">1С 8 чел.: 512 ч продукт + 128 ч буфер. WEB 8: 512 + 128. Mobile 2: 128 + 32.</p>
           </div>
         </li>
         <li>
