@@ -133,11 +133,12 @@ table.mini td:first-child{font-weight:700;white-space:nowrap}
 .rice-type .sub{font-size:14px;color:#555B66;margin-top:4px}
 .rice-formula{background:#fff;border-radius:12px;padding:12px 16px;
   box-shadow:0 2px 8px rgba(20,43,77,.08);flex-shrink:0;
-  display:flex;align-items:center;justify-content:flex-start;gap:14px}
-.rice-formula .eq{font-size:22px;font-weight:800;color:#142B4D;flex-shrink:0}
+  display:flex;align-items:flex-start;justify-content:flex-start;gap:14px}
+.rice-formula .eq{font-size:20px;font-weight:800;color:#142B4D;flex-shrink:0;white-space:nowrap;line-height:1.25}
 .rice-formula .eq b{color:#1F8A8A}
-.rice-formula .note{font-size:16px;color:#555B66;line-height:1.4}
-.rice-split{flex:0 0 auto;display:grid;grid-template-columns:1.25fr .75fr;gap:10px}
+.rice-formula .note{font-size:15px;color:#555B66;line-height:1.4}
+.rice-formula .note b{color:#142B4D;font-weight:700}
+.rice-split{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .rice .card{flex:none;min-height:0;display:flex;flex-direction:column}
 .rice .card h3{flex-shrink:0;font-size:17px;margin-bottom:8px}
 .rice-mx{flex:1;min-height:0}
@@ -310,19 +311,20 @@ table.mini td:first-child{font-weight:700;white-space:nowrap}
   </section>
 
   <!-- ═══════ SLIDE 2: RICE prioritization ═══════ -->
-  <section class="slide" id="s2" aria-label="Слайд 2: приоритезация по матрице">
+  <section class="slide" id="s2" aria-label="Слайд 2: приоритет воронки PMO">
     <div class="sh">
       <h1>Как проектный отдел считает приоритет</h1>
+      <h2>Вариант 2 · балл воронки = (стратегия × ценность) ÷ размер · согласовано 06.11.2026</h2>
     </div>
     <div class="rice">
       <div class="rice-types">
         <div class="rice-type">
           <h3>Продукт</h3>
-          <p>Новая ценность. PMO ставит ценность, разработка — размер. Смотрим клетку матрицы и отдаём сверху вниз, не больше ёмкости спринта.</p>
+          <p>PMO ставит стратегию и ценность, разработка — размер и стек. Сортируем по баллу и отдаём сверху, не больше 80% ёмкости стека.</p>
         </div>
         <div class="rice-type bug">
           <h3>Баг</h3>
-          <p>Живёт в буфере 20% спринта. Считаем по критичности, в матрицу не кладём.</p>
+          <p>Живёт в буфере 20% спринта. Считаем по критичности, в формулу воронки не кладём.</p>
         </div>
         <div class="rice-type exp">
           <h3>Срочное</h3>
@@ -331,30 +333,49 @@ table.mini td:first-child{font-weight:700;white-space:nowrap}
       </div>
 
       <div class="rice-formula">
-        <div class="eq">Клетка = приоритет</div>
-        <p class="note">Ценность: слабый / средний / сильный. Размер: S до 2 SP · M 3–5 SP · L 8 SP и больше. Нет постановки — в матрицу не кладём.</p>
+        <div class="eq">Приоритет = (<b>стратегия</b> × <b>ценность</b>) ÷ <b>размер (SP)</b></div>
+        <p class="note">
+          Чем больше пользы на единицу работы — тем раньше берём. Нет постановки — карточку не сравниваем.
+          <br>
+          <b>Стратегия:</b> стратегический контур = 3 · развитие линии = 2 · локальный запрос = 1.
+          <b>Ценность:</b> XS = 1 · S = 2 · M = 3 · L = 4 · XL = 5.
+          <b>Размер:</b> майка на приоритезации (XS 1 · S 2 · M 5 · L 8 · XL 10 SP), после декомпозиции — точный SP.
+          <br>
+          Пример: стратегический контур, XL, 5 SP → (3 × 5) / 5 = 3,00. Локальный запрос, S, 1 SP → 2,00. Развитие линии, L, 10 SP → 0,80. Порядок: 3,00 → 2,00 → 0,80.
+        </p>
       </div>
 
       <div class="rice-split">
         <div class="card rice-mx">
-          <h3>Матрица продукта</h3>
+          <h3>Поля на карточке доски ценностей</h3>
           <table class="mini">
-            <tr><th></th><th>S · до 2 SP</th><th>M · 3–5 SP</th><th>L · 8 SP и больше</th></tr>
-            <tr><td>Сильный</td><td class="hi">Брать первыми</td><td class="hi">Во вторую очередь</td><td class="mid">Делить или откладывать</td></tr>
-            <tr><td>Средний</td><td class="hi">Во вторую очередь</td><td class="mid">Очередь продукта</td><td class="lo">Только если есть ёмкость</td></tr>
-            <tr><td>Слабый</td><td class="mid">Мелочь в хвост спринта</td><td class="lo">Не отдавать, пока очередь &gt; 1 спринта</td><td class="lo">Не брать</td></tr>
+            <tr><th>Поле</th><th>Значения</th><th>Кто</th></tr>
+            <tr><td>Класс</td><td>продукт / баг / срочное</td><td>PMO на входе</td></tr>
+            <tr><td>Постановка</td><td>да — сравниваем · нет — не сравниваем</td><td>PMO</td></tr>
+            <tr><td>Стратегия</td><td>стратегический контур 3 · развитие линии 2 · локальный запрос 1</td><td>PMO</td></tr>
+            <tr><td>Ценность</td><td>XS–XL → 1–5</td><td>PMO</td></tr>
+            <tr><td>Размер</td><td>майка, затем SP</td><td>PMO грубо, Dev точно</td></tr>
+            <tr><td>Стек</td><td>1С / Node.js / React / Flutter + SP</td><td>Dev после декомпозиции</td></tr>
           </table>
         </div>
         <div class="card rice-tie">
-          <h3>Если размер одинаковый</h3>
+          <h3>Как набирать спринт</h3>
           <ol>
             <li>
               <span class="n" aria-hidden="true">1</span>
-              <p>Есть SP — меньше SP выше. Две карточки M, 3 SP и 5 SP: сначала 3 SP.</p>
+              <p>Сортируем продукт по баллу. Ничья — меньше SP выше, иначе кто раньше получил постановку.</p>
             </li>
             <li>
               <span class="n" aria-hidden="true">2</span>
-              <p>SP нет или тоже равны — кто раньше получил готовую постановку.</p>
+              <p>Берём сверху, пока стек не наберёт 80% баллов: 1С 9,6 · Node.js 6,4 · React 4,8 · Flutter 1,6. Вся разработка 22,4.</p>
+            </li>
+            <li>
+              <span class="n" aria-hidden="true">3</span>
+              <p>Несколько стеков — в спринт только влезающая часть. Воронка до ~150, в «Приоритезация / Готово» ≤ 20.</p>
+            </li>
+            <li>
+              <span class="n" aria-hidden="true">4</span>
+              <p>Новый высокий балл вытесняет нижнюю из готовых, не из работы в коде.</p>
             </li>
           </ol>
         </div>
@@ -365,10 +386,10 @@ table.mini td:first-child{font-weight:700;white-space:nowrap}
           <h3>Что делать на этапах карты потока</h3>
           <table class="mini">
             <tr><th>Этап карты</th><th>Проектный отдел</th><th>От разработки</th></tr>
-            <tr><td>Ожидание · 4,8 дн.</td><td>Тип: продукт / баг / срочное. Взять, отложить датой или закрыть. В матрицу ещё не кладём.</td><td>Ничего</td></tr>
-            <tr><td>Проработка PM · 10,4 дн.</td><td>Готова постановка — да / нет. Если да, ставит ценность: слабый / средний / сильный.</td><td>Грубо: S / M / L или «влезает в спринт / нет»</td></tr>
-            <tr><td>Оценка · 5,9 дн.</td><td>Кладёт карточку в клетку. Если в клетке несколько — правило справа.</td><td>Точный SP и что вытеснится, если взять эту</td></tr>
-            <tr><td>Downstream и приёмка</td><td>Карточки в коде не переставляет. Новая сильная S вытесняет нижнюю из готовых, не из работы.</td><td>Когда задачу закрыли — ставят дату в «Готово / Готово», иначе очередь снова считают на глаз. Если после кода пришло замечание или баг с приёмки — отвечаем заказчику за 3 дня и берём это из буфера 20%, а не как новую продуктовую задачу сверху.</td></tr>
+            <tr><td>Ожидание · 4,8 дн.</td><td>Тип: продукт / баг / срочное. Взять, отложить датой или закрыть. В формулу ещё не кладём.</td><td>Ничего</td></tr>
+            <tr><td>Проработка PM · 10,4 дн.</td><td>Постановка да / нет. Если да — стратегия, ценность, грубый размер, намётка стека. Считаем черновой балл.</td><td>Грубо: майка размера или «влезает в спринт / нет»</td></tr>
+            <tr><td>Оценка · 5,9 дн.</td><td>Подставляет точный SP, пересчитывает балл, кладёт карточку в отсортированную воронку.</td><td>Точный SP, расклад по стекам и что вытеснится, если взять эту</td></tr>
+            <tr><td>Downstream и приёмка</td><td>Карточки в коде не переставляет. Новый высокий балл вытесняет нижнюю из готовых, не из работы.</td><td>Когда задачу закрыли — ставят дату в «Готово / Готово». Замечание с приёмки — в буфер 20%, не новая продуктовая задача сверху. Ответ заказчику ≤ 3 дней.</td></tr>
           </table>
         </div>
       </div>
