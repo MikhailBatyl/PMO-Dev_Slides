@@ -96,11 +96,124 @@ body{background:#0f1923;display:flex;align-items:center;justify-content:center;
 .cav strong{color:#555B66}
 
 /* VSM + priority slides (s3, s4) + bugs (s5) */
-#s3,#s4,#s5{padding:22px 36px 12px}
-#s3 .sh,#s4 .sh,#s5 .sh{margin-bottom:8px}
+#s3,#s4,#s5,#s6{padding:22px 36px 12px}
+#s3 .sh,#s4 .sh,#s5 .sh,#s6 .sh{margin-bottom:8px}
 #s3 .sh h1{font-size:28px}
 #s3 .sh h2{font-size:16px;margin-top:3px}
 #s4 .sh h1{font-size:28px}
+#s6 .sh h1{font-size:28px}
+#s6 .sh h2{font-size:15px;margin-top:3px;color:#8899AA}
+
+/* Slide 6 — dashboard style (по образцу PMO FIT) */
+#s6{--bl:#2F6FE4;--bl-bg:#E8F0FE;--pu:#7B4BD6;--pu-bg:#F1E8FD;--gy:#6B7686;--gy-bg:#EEF0F4;
+  --or:#E0861A;--or-bg:#FDF0E0;--tl:#0E8A94;--tl-bg:#E0F3F5;--gn:#2E9E5B;--gn-bg:#E2F4E6;
+  --bd:#E3E7EE;--mu:#8A94A6}
+#s6 .sh h2{color:var(--mu)}
+#s6 .wrap{flex:1;min-height:0;display:flex;flex-direction:column;gap:14px}
+
+/* formula KPI cards */
+#s6 .kp{display:flex;align-items:center;gap:12px;flex-shrink:0}
+#s6 .kp .op{font-size:40px;font-weight:300;color:#B8C0CC;width:32px;text-align:center;line-height:1}
+#s6 .k{flex:1;background:#fff;border:1px solid var(--bd);border-bottom:5px solid var(--bl);border-radius:10px;
+  padding:13px 22px 11px;box-shadow:0 1px 3px rgba(20,43,77,.06);display:flex;flex-direction:column;gap:3px}
+#s6 .k .l{font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--mu)}
+#s6 .k .v{font-size:46px;font-weight:800;line-height:1.05;color:var(--bl)}
+#s6 .k .c{font-size:14px;color:var(--mu)}
+#s6 .k-v{border-bottom-color:var(--or)}#s6 .k-v .v{color:var(--or)}
+#s6 .k-z{border-bottom-color:var(--tl)}#s6 .k-z .v{color:var(--tl)}
+#s6 .k-p{border-bottom-color:var(--gn)}#s6 .k-p .v{color:var(--gn)}
+
+/* section label + legend */
+#s6 .sec{display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+#s6 .sec .t{font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--mu)}
+#s6 .sec .lg{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mu)}
+#s6 .sec .lg i{display:inline-block;width:22px;height:12px;border-radius:3px;margin-left:16px}
+#s6 .sec .lg i:first-child{margin-left:0}
+#s6 .d1{background:var(--bl-bg);border:2px solid var(--bl)}
+#s6 .d2{background:var(--pu-bg);border:2px solid var(--pu)}
+#s6 .d3{background:var(--gy-bg);border:2px solid var(--gy)}
+
+/* strategy board */
+#s6 .board{flex:1.1;min-height:0;display:flex;flex-direction:column;gap:8px}
+#s6 .bh,#s6 .br{display:grid;grid-template-columns:380px 190px 1fr 500px 180px;gap:20px;align-items:center}
+#s6 .bh{padding:0 28px;flex-shrink:0;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#A9B2C0}
+#s6 .br{flex:1;min-height:0;background:#fff;border:1px solid var(--bd);border-left:6px solid var(--bl);
+  border-radius:10px;padding:0 22px;box-shadow:0 1px 3px rgba(20,43,77,.06)}
+#s6 .r2{border-left-color:var(--pu)}
+#s6 .r3{border-left-color:var(--gy)}
+#s6 .c1{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+#s6 .c1 b{font-size:24px;font-weight:800;color:#142B4D;line-height:1.15}
+#s6 .pill{font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;padding:3px 10px;border-radius:4px}
+#s6 .p1{background:var(--bl-bg);color:var(--bl)}
+#s6 .p2{background:var(--pu-bg);color:var(--pu)}
+#s6 .p3{background:var(--gy-bg);color:var(--gy)}
+#s6 .c2{display:flex;flex-direction:column;gap:8px}
+#s6 .c2 .n{font-size:46px;font-weight:800;line-height:1;color:var(--bl)}
+#s6 .r2 .c2 .n{color:var(--pu)}
+#s6 .r3 .c2 .n{color:var(--gy)}
+#s6 .sgm{display:flex;gap:3px;width:108px}
+#s6 .sgm i{flex:1;height:7px;border-radius:2px;background:#E3E7EE}
+#s6 .r1 .sgm i.on{background:var(--bl)}
+#s6 .r2 .sgm i.on{background:var(--pu)}
+#s6 .r3 .sgm i.on{background:var(--gy)}
+#s6 .c3{font-size:19px;line-height:1.35;color:#3A4452}
+#s6 .c4{display:flex;flex-direction:column;gap:7px}
+#s6 .chp{font-size:16px;font-weight:600;color:#2A3341;border-left:4px solid var(--bl);background:var(--bl-bg);
+  border-radius:5px;padding:7px 14px}
+#s6 .r2 .chp{border-left-color:var(--pu);background:var(--pu-bg)}
+#s6 .r3 .chp{border-left-color:var(--gy);background:var(--gy-bg)}
+#s6 .pips{display:flex;gap:5px}
+#s6 .pips i{width:15px;height:24px;border-radius:3px;background:#E3E7EE}
+#s6 .r1 .pips i.on{background:var(--bl)}
+#s6 .r2 .pips i.on{background:var(--pu)}
+#s6 .r3 .pips i.on{background:var(--gy)}
+#s6 .c5 .ft{font-size:14px;font-weight:600;color:var(--mu);margin-top:7px}
+
+/* bottom panels */
+#s6 .bot{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr 1.15fr;gap:14px}
+#s6 .pc{background:#fff;border:1px solid var(--bd);border-bottom:5px solid var(--or);border-radius:10px;
+  padding:14px 22px 12px;display:flex;flex-direction:column;min-height:0;box-shadow:0 1px 3px rgba(20,43,77,.06)}
+#s6 .pc.pz{border-bottom-color:var(--tl)}
+#s6 .pc.pe{border-bottom-color:var(--gn)}
+#s6 .ph{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;flex-shrink:0}
+#s6 .ph b{font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#142B4D}
+#s6 .ph span{font-size:13px;color:var(--mu)}
+#s6 .rows{flex:1;min-height:0;display:flex;flex-direction:column}
+#s6 .vr{flex:1;display:grid;grid-template-columns:52px 1fr 130px 40px;gap:14px;align-items:center;border-top:1px solid #EEF1F5}
+#s6 .vr:first-child{border-top:none}
+#s6 .vr.sz{grid-template-columns:52px 1fr 66px 54px}
+#s6 .hh{font-size:15px;font-weight:700;color:var(--mu);text-align:right}
+#s6 .vr.v{grid-template-columns:52px 1fr 40px}
+#s6 .tg.t1{background:#FDF3E6;color:#E0861A}
+#s6 .tg.t2{background:#FBE3C2;color:#C9740F}
+#s6 .tg.t3{background:#F6C98E;color:#8A4A05}
+#s6 .tg.t4{background:#EBA044;color:#fff}
+#s6 .tg.t5{background:#D9730D;color:#fff}
+#s6 .tg{font-size:13px;font-weight:800;text-align:center;padding:5px 0;border-radius:4px;background:var(--or-bg);color:var(--or)}
+#s6 .pz .tg{background:var(--tl-bg);color:var(--tl)}
+#s6 .tx{font-size:17px;color:#3A4452;line-height:1.25}
+#s6 .bar{height:10px;background:#EEF1F5;border-radius:5px;overflow:hidden}
+#s6 .bar i{display:block;height:100%;border-radius:5px;background:var(--or)}
+#s6 .pz .bar i{background:var(--tl)}
+#s6 .nn{font-size:26px;font-weight:800;text-align:right;color:var(--or)}
+#s6 .pz .nn{color:var(--tl);font-size:22px}
+#s6 .pz .nn small{font-size:13px;font-weight:700;color:var(--mu);margin-left:2px}
+
+/* example cards */
+#s6 .ex{flex:1;display:grid;grid-template-columns:32px 1fr auto;gap:14px;align-items:center;
+  border-left:5px solid var(--bl);background:var(--bl-bg);border-radius:6px;padding:0 18px;margin-bottom:8px}
+#s6 .ex:last-child{margin-bottom:0}
+#s6 .ex.e2{border-left-color:var(--gy);background:var(--gy-bg)}
+#s6 .ex.e3{border-left-color:var(--pu);background:var(--pu-bg)}
+#s6 .ex .rk{width:30px;height:30px;border-radius:50%;background:#fff;color:var(--bl);font-weight:800;font-size:15px;
+  display:flex;align-items:center;justify-content:center}
+#s6 .ex.e2 .rk{color:var(--gy)}
+#s6 .ex.e3 .rk{color:var(--pu)}
+#s6 .ex .et b{display:block;font-size:17px;font-weight:700;color:#142B4D}
+#s6 .ex .et span{font-size:15px;color:#5A6577}
+#s6 .ex .sc{font-size:34px;font-weight:800;color:var(--bl);line-height:1}
+#s6 .ex.e2 .sc{color:var(--gy)}
+#s6 .ex.e3 .sc{color:var(--pu)}
 
 .vsm{flex:0 0 auto;display:flex;flex-direction:column}
 .map{background:#fff;border-radius:14px;padding:14px 18px 12px;
@@ -637,6 +750,93 @@ table.mini td:first-child{font-weight:700;white-space:nowrap}
     </div>
   </section>
 
+  <!-- ═══════ SLIDE 6: strategy field ═══════ -->
+  <section class="slide" id="s6" aria-label="Слайд 6: стратегия карточки">
+    <div class="sh">
+      <h1>Стратегия карточки: чья это ставка</h1>
+      <h2>Шкалы балла и формула приоритета · PMO-Prioritization</h2>
+    </div>
+    <div class="wrap">
+
+      <div class="kp">
+        <div class="k k-s"><span class="l">Стратегия</span><span class="v">3 · 2 · 1</span><span class="c">чья ставка · ставит PMO</span></div>
+        <span class="op">×</span>
+        <div class="k k-v"><span class="l">Ценность</span><span class="v">XS … XL</span><span class="c">балл 1–5 · ставит PMO</span></div>
+        <span class="op">÷</span>
+        <div class="k k-z"><span class="l">Размер</span><span class="v">SP</span><span class="c">1 SP = 4 часа · майка → точный SP</span></div>
+        <span class="op">=</span>
+        <div class="k k-p"><span class="l">Приоритет</span><span class="v">балл</span><span class="c">порядок воронки</span></div>
+      </div>
+
+      <div class="sec">
+        <span class="t">Уровни стратегии</span>
+        <span class="lg"><i class="d1"></i>Стратегический контур<i class="d2"></i>Развитие линии<i class="d3"></i>Локальный запрос</span>
+      </div>
+
+      <div class="board">
+        <div class="bh"><span>Уровень</span><span>Балл</span><span>Вопрос</span><span>Пример карточки</span><span>В воронке</span></div>
+
+        <div class="br r1">
+          <div class="c1"><span class="pill p1">Контур</span><b>Стратегический контур</b></div>
+          <div class="c2"><span class="n">×3</span><div class="sgm"><i class="on"></i><i class="on"></i><i class="on"></i></div></div>
+          <div class="c3">Ставка компании на деньги: выручка, удержание, маржа. Либо обязательный контур.</div>
+          <div class="c4"><span class="chp">Платная подписка</span><span class="chp">Рост среднего чека</span></div>
+          <div class="c5"><div class="pips"><i class="on"></i><i></i><i></i><i></i><i></i></div><div class="ft">редко</div></div>
+        </div>
+
+        <div class="br r2">
+          <div class="c1"><span class="pill p2">Линия</span><b>Развитие линии</b></div>
+          <div class="c2"><span class="n">×2</span><div class="sgm"><i class="on"></i><i class="on"></i><i></i></div></div>
+          <div class="c3">Плановый шаг уже ведущейся продуктовой линии.</div>
+          <div class="c4"><span class="chp">История заказов в ЛК</span><span class="chp">Push-уведомления</span></div>
+          <div class="c5"><div class="pips"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div><div class="ft">ядро воронки</div></div>
+        </div>
+
+        <div class="br r3">
+          <div class="c1"><span class="pill p3">Запрос</span><b>Локальный запрос</b></div>
+          <div class="c2"><span class="n">×1</span><div class="sgm"><i class="on"></i><i></i><i></i></div></div>
+          <div class="c3">Просьба одного заказчика, роли или участка.</div>
+          <div class="c4"><span class="chp">Экспорт в Excel</span><span class="chp">Доп. фильтр в списке</span></div>
+          <div class="c5"><div class="pips"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div><div class="ft">часто</div></div>
+        </div>
+      </div>
+
+      <div class="bot">
+        <div class="pc">
+          <div class="ph"><b>Ценность</b><span>кому полезно · балл 1–5</span></div>
+          <div class="rows">
+            <div class="vr v"><span class="tg t1">XS</span><span class="tx">один человек</span><b class="nn">1</b></div>
+            <div class="vr v"><span class="tg t2">S</span><span class="tx">одна роль или участок</span><b class="nn">2</b></div>
+            <div class="vr v"><span class="tg t3">M</span><span class="tx">процесс или линия целиком</span><b class="nn">3</b></div>
+            <div class="vr v"><span class="tg t4">L</span><span class="tx">весь продукт, все клиенты</span><b class="nn">4</b></div>
+            <div class="vr v"><span class="tg t5">XL</span><span class="tx">выручка или потери компании</span><b class="nn">5</b></div>
+          </div>
+        </div>
+
+        <div class="pc pz">
+          <div class="ph"><b>Размер (майка)</b><span>1 SP = 4 часа</span></div>
+          <div class="rows">
+            <div class="vr sz"><span class="tg">XS</span><div class="bar"><i style="width:10%"></i></div><b class="nn">1<small>SP</small></b><span class="hh">4 ч</span></div>
+            <div class="vr sz"><span class="tg">S</span><div class="bar"><i style="width:20%"></i></div><b class="nn">2<small>SP</small></b><span class="hh">8 ч</span></div>
+            <div class="vr sz"><span class="tg">M</span><div class="bar"><i style="width:50%"></i></div><b class="nn">5<small>SP</small></b><span class="hh">20 ч</span></div>
+            <div class="vr sz"><span class="tg">L</span><div class="bar"><i style="width:80%"></i></div><b class="nn">8<small>SP</small></b><span class="hh">32 ч</span></div>
+            <div class="vr sz"><span class="tg">XL</span><div class="bar"><i style="width:100%"></i></div><b class="nn">10<small>SP</small></b><span class="hh">40 ч</span></div>
+          </div>
+        </div>
+
+        <div class="pc pe">
+          <div class="ph"><b>Пример</b><span>порядок 3,00 → 2,00 → 0,80</span></div>
+          <div class="rows">
+            <div class="ex e1"><span class="rk">1</span><div class="et"><b>Контур · ценность XL · размер M</b><span>(3 × 5) ÷ 5 SP (20 ч)</span></div><span class="sc">3,00</span></div>
+            <div class="ex e2"><span class="rk">2</span><div class="et"><b>Локальный · ценность S · размер XS</b><span>(1 × 2) ÷ 1 SP (4 ч)</span></div><span class="sc">2,00</span></div>
+            <div class="ex e3"><span class="rk">3</span><div class="et"><b>Развитие · ценность L · размер XL</b><span>(2 × 4) ÷ 10 SP (40 ч)</span></div><span class="sc">0,80</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
  </div>
 </div>
 
@@ -647,7 +847,8 @@ table.mini td:first-child{font-weight:700;white-space:nowrap}
  <span class="nd" data-n="2"></span>
  <span class="nd" data-n="3"></span>
  <span class="nd" data-n="4"></span>
- <span class="nc" id="nc">1/5</span>
+ <span class="nd" data-n="5"></span>
+ <span class="nc" id="nc">1/6</span>
  <button class="nb" id="nb" aria-label="Вперёд">&#8594;</button>
 </nav>
 
